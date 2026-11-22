@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Harsh Family Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Figtree:wght@400;500;600&display=swap">
+<style>
+/* Layout: one dark night-sky page lit by a slow coral/marigold/aqua glow; keycaps are the motif, games get the big stage, work stays small. */
+:root{
+  --bg:#0B0D1F;
+  --surface:rgba(255,255,255,.06);
+  --line:rgba(255,255,255,.12);
+  --ink:#F4F2FF;
+  --muted:#A9A8C6;
+  --coral:#FF5E5B;
+  --marigold:#FFB627;
+  --aqua:#2EC4B6;
+  --display:"Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
+  --body:"Figtree", "Segoe UI", system-ui, sans-serif;
+  --r:24px;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.55;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--marigold);outline-offset:3px;border-radius:8px}
+
+/* ambient glow */
+.glow{position:fixed;inset:-20vmax;z-index:0;pointer-events:none;filter:blur(70px);opacity:.55}
+.glow i{position:absolute;width:48vmax;height:48vmax;border-radius:50%}
+.glow i:nth-child(1){background:var(--coral);left:8%;top:2%;animation:drift1 22s ease-in-out infinite alternate}
+.glow i:nth-child(2){background:var(--marigold);right:6%;top:18%;width:38vmax;height:38vmax;opacity:.8;animation:drift2 26s ease-in-out infinite alternate}
+.glow i:nth-child(3){background:var(--aqua);left:30%;bottom:-4%;width:44vmax;height:44vmax;opacity:.7;animation:drift3 30s ease-in-out infinite alternate}
+@keyframes drift1{to{transform:translate(12vmax,8vmax) scale(1.1)}}
+@keyframes drift2{to{transform:translate(-10vmax,12vmax) scale(.9)}}
+@keyframes drift3{to{transform:translate(8vmax,-10vmax) scale(1.15)}}
+.grain{position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse at top,transparent 30%,rgba(11,13,31,.65) 80%)}
+
+.wrap{position:relative;z-index:1;width:min(1120px,100% - 40px);margin:0 auto}
+nav{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:22px 0}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--display);font-weight:800;font-size:20px;letter-spacing:-.01em;text-decoration:none}
+.brand .dot{width:30px;height:30px;border-radius:9px;background:conic-gradient(from 200deg,var(--coral),var(--marigold),var(--aqua),var(--coral));box-shadow:0 0 24px rgba(255,94,91,.5)}
+.navlinks{display:flex;gap:6px}
+.navlinks a{text-decoration:none;color:var(--muted);font-weight:500;font-size:15px;padding:8px 14px;border-radius:999px;transition:color .2s,background .2s}
+.navlinks a:hover{color:var(--ink);background:var(--surface)}
+
+/* hero */
+.hero{padding:56px 0 40px;display:grid;gap:28px}
+.eyebrow{font-weight:600;font-size:14px;letter-spacing:.14em;text-transform:uppercase;color:var(--marigold)}
+h1{font-family:var(--display);font-weight:800;font-size:clamp(46px,9vw,112px);line-height:.92;letter-spacing:-.045em;margin:0;text-wrap:balance}
+h1 .grad{background:linear-gradient(100deg,var(--coral) 10%,var(--marigold) 50%,var(--aqua) 90%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.lede{max-width:34ch;font-size:clamp(18px,2.2vw,22px);color:var(--muted);margin:0}
+
+/* keycaps */
+.keys{display:flex;flex-wrap:wrap;gap:10px}
+.key{--c:var(--coral);width:62px;height:62px;border-radius:14px;display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:26px;
+  background:linear-gradient(180deg,rgba(255,255,255,.14),rgba(255,255,255,.04));border:1px solid var(--line);
+  box-shadow:inset 0 -5px 0 rgba(0,0,0,.35),0 8px 22px rgba(0,0,0,.35);transition:transform .12s,box-shadow .12s,background .12s;user-select:none;cursor:pointer}
+.key.lit,.key:active{transform:translateY(3px);background:var(--c);color:#14122B;box-shadow:inset 0 -2px 0 rgba(0,0,0,.25),0 0 28px var(--c)}
+.key:nth-child(3n+2){--c:var(--marigold)}
+.key:nth-child(3n){--c:var(--aqua)}
+.key.space{width:150px;font-size:14px;font-family:var(--body);font-weight:600;letter-spacing:.08em;color:var(--muted)}
+.keyhint{font-size:14px;color:var(--muted);margin:0}
+
+/* sections */
+section{padding:40px 0}
+.sechead{display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:20px}
+h2{font-family:var(--display);font-weight:800;font-size:clamp(30px,4.5vw,48px);letter-spacing:-.03em;line-height:1;margin:0;text-wrap:balance}
+.sechead p{margin:0;color:var(--muted);font-size:15px}
+
+.games{display:grid;grid-template-columns:1.6fr 1fr;gap:18px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.feature{position:relative;overflow:hidden;padding:30px;display:grid;gap:16px;min-height:340px;align-content:end;text-decoration:none;transition:transform .25s,border-color .25s}
+.feature:hover{transform:translateY(-4px);border-color:rgba(255,182,39,.5)}
+.feature::before{content:"";position:absolute;inset:0;background:linear-gradient(140deg,rgba(255,94,91,.55),rgba(255,182,39,.35) 45%,rgba(46,196,182,.25));z-index:-1}
+.feature .art{position:absolute;right:-10px;top:-6px;display:grid;grid-template-columns:repeat(3,64px);gap:10px;transform:rotate(-8deg);opacity:.95}
+.feature .art span{height:64px;border-radius:14px;display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:26px;color:#14122B;background:rgba(255,255,255,.9);box-shadow:inset 0 -5px 0 rgba(0,0,0,.18)}
+.feature .art span.on{background:var(--marigold)}
+.feature .art span.paw{background:var(--aqua)}
+.tag{justify-self:start;font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:6px 12px;border-radius:999px;background:rgba(11,13,31,.55);border:1px solid var(--line)}
+.feature h3{font-family:var(--display);font-weight:800;font-size:clamp(34px,5vw,56px);letter-spacing:-.035em;line-height:.95;margin:0}
+.feature p{margin:0;max-width:40ch;color:#FFF3E6}
+.play{justify-self:start;display:inline-flex;align-items:center;gap:10px;font-weight:600;font-size:17px;padding:14px 22px;border-radius:999px;background:var(--ink);color:#14122B;box-shadow:0 10px 30px rgba(0,0,0,.35);transition:gap .2s}
+.feature:hover .play{gap:16px}
+.side{display:grid;gap:18px}
+.soon{padding:24px;display:grid;gap:8px;border-style:dashed;align-content:center}
+.soon h3{font-family:var(--display);font-weight:700;font-size:24px;letter-spacing:-.02em;margin:0}
+.soon p{margin:0;color:var(--muted);font-size:15px}
+.howto{padding:24px;display:grid;gap:10px}
+.howto h3{font-family:var(--display);font-weight:700;font-size:20px;margin:0}
+.howto ol{margin:0;padding-left:20px;color:var(--muted);font-size:15px;display:grid;gap:6px}
+
+/* work */
+.work{display:grid;grid-template-columns:1fr 1.4fr;gap:18px}
+.work .intro{padding:28px;display:grid;gap:12px;align-content:start}
+.work .intro p{margin:0;color:var(--muted)}
+.work .intro strong{color:var(--ink);font-weight:600}
+.timeline{padding:12px 28px}
+.row{display:grid;grid-template-columns:120px 1fr;gap:16px;padding:16px 0;border-bottom:1px solid var(--line)}
+.row:last-child{border-bottom:0}
+.row .when{font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--marigold);padding-top:3px}
+.row b{display:block;font-family:var(--display);font-weight:700;font-size:20px;letter-spacing:-.01em}
+.row span{color:var(--muted);font-size:15px}
+
+.companies{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:18px}
+.co{display:grid;place-items:center;gap:4px;min-height:92px;padding:16px;text-align:center}
+.co b{font-family:var(--display);font-weight:800;font-size:22px;letter-spacing:-.02em;line-height:1}
+.co img{max-height:36px;max-width:80%;filter:brightness(0) invert(1);opacity:.92}
+.co span{font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.li{justify-self:start;display:inline-flex;align-items:center;gap:10px;font-weight:600;font-size:16px;padding:12px 20px;border-radius:999px;text-decoration:none;background:#0A66C2;color:#fff;transition:transform .2s}
+.li:hover{transform:translateY(-2px)}
+.li[hidden]{display:none}
+@media (max-width:520px){ .companies{grid-template-columns:1fr} .co{min-height:72px} }
+
+footer{padding:40px 0 56px;color:var(--muted);font-size:14px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;border-top:1px solid var(--line);margin-top:24px}
+
+@media (max-width:820px){
+  .games,.work{grid-template-columns:1fr}
+  .navlinks a{padding:8px 10px}
+  .hero{padding-top:28px}
+  .feature{min-height:0;padding-top:150px}
+  .feature .art{right:-6px;top:14px}
+  .row{grid-template-columns:1fr;gap:4px}
+}
+@media (max-width:420px){
+  .key{width:52px;height:52px;font-size:22px}
+  .key.space{width:120px}
+  .feature .art{grid-template-columns:repeat(3,52px)}
+  .feature .art span{height:52px;font-size:22px}
+  .navlinks a:not(.keep){display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  .glow i{animation:none}
+  *{transition:none!important}
+}
+</style>
+</head>
+<body>
+<div class="glow" aria-hidden="true"><i></i><i></i><i></i></div>
+<div class="grain" aria-hidden="true"></div>
+
+<div class="wrap">
+  <nav>
+    <a class="brand" href="#top"><span class="dot" aria-hidden="true"></span>Harsh Family</a>
+    <div class="navlinks">
+      <a class="keep" href="#play">Play</a>
+      <a href="#work">Work</a>
+    </div>
+  </nav>
+
+  <header class="hero" id="top">
+    <div class="eyebrow">Chapel Hill, NC</div>
+    <h1>Home base for the <span class="grad">Harsh family.</span></h1>
+    <p class="lede">The games we make, the things we're into, and where to find Nikhil at work.</p>
+    <div class="keys" id="keys" aria-label="Keyboard toy: type H, O, M or E">
+      <div class="key" data-k="h">H</div><div class="key" data-k="o">O</div><div class="key" data-k="m">M</div><div class="key" data-k="e">E</div><div class="key space" data-k=" ">SPACE</div>
+    </div>
+    <p class="keyhint">Go on, tap the keys. Home row hands ready.</p>
+  </header>
+
+  <section id="play">
+    <div class="sechead"><h2>Play</h2><p>Games made at home, for the kids.</p></div>
+    <div class="games">
+      <a class="card feature" href="https://pawsandkeys.nikhil-apps.workers.dev">
+        <div class="art" aria-hidden="true"><span>F</span><span class="on">J</span><span class="paw">🐾</span><span class="on">A</span><span>S</span><span>D</span></div>
+        <span class="tag">Typing game</span>
+        <h3>Paws &amp; Keys</h3>
+        <p>Learn to type with a pet friend. Pop bubbles, race the snail, dig for stickers, raise critters and build a block world.</p>
+        <span class="play">Play now <span aria-hidden="true">→</span></span>
+      </a>
+      <div class="side">
+        <div class="card howto">
+          <h3>Playing on a new computer?</h3>
+          <ol>
+            <li>Open Paws &amp; Keys from this page.</li>
+            <li>Pick your player. Your stars, coins and pets are already there.</li>
+          </ol>
+        </div>
+        <div class="card soon">
+          <h3>Next game: coming soon</h3>
+          <p>Ideas welcome. Ask at dinner.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="work">
+    <div class="sechead"><h2>Nikhil at work</h2><p>The short version.</p></div>
+    <div class="work">
+      <div class="card intro">
+        <p><strong>Nikhil Harsh</strong> is President of BigScoots and a revenue leader who has run sales, customer success and revenue operations at growing software and cybersecurity companies.</p>
+        <p>He has seen companies through venture, private equity and IPO stages, and lives in Chapel Hill with his family.</p>
+        <a class="li" id="linkedin" href="#" hidden>Connect on LinkedIn <span aria-hidden="true">↗</span></a>
+      </div>
+      <div class="card timeline">
+        <div class="row"><div class="when">Now</div><div><b>President, BigScoots</b><span>Leading the business end to end.</span></div></div>
+        <div class="row"><div class="when">Before</div><div><b>Revenue leadership</b><span>CRO, VP Customer Success and RevOps roles.</span></div></div>
+        <div class="row"><div class="when">Datto</div><div><b>Scaled through VC, PE and IPO</b><span>Growth across every stage of the company's path.</span></div></div>
+        <div class="row"><div class="when">Early</div><div><b>Inverness Graham</b><span>Private equity and investment banking.</span></div></div>
+      </div>
+    </div>
+    <div class="companies" aria-label="Companies">
+      <div class="card co" data-logo="assets/logos/bigscoots.svg"><b>BigScoots</b><span>President</span></div>
+      <div class="card co" data-logo="assets/logos/datto.svg"><b>Datto</b><span>VC to PE to IPO</span></div>
+      <div class="card co" data-logo="assets/logos/inverness-graham.svg"><b>Inverness Graham</b><span>Private equity</span></div>
+    </div>
+  </section>
+
+  <footer>
+    <span>© 2026 The Harsh family</span>
+    <span>Made at home in Chapel Hill.</span>
+  </footer>
+</div>
+
+<script>
+(function(){
+  // Settings: paste the LinkedIn profile address here to show the button.
+  var LINKEDIN_URL = '';
+  if(LINKEDIN_URL){ var li = document.getElementById('linkedin'); li.href = LINKEDIN_URL; li.hidden = false; }
+  // Company logos: drop an official logo file at the path in data-logo and it replaces the name.
+  document.querySelectorAll('.co[data-logo]').forEach(function(el){
+    var img = new Image(); img.alt = el.querySelector('b').textContent;
+    img.onload = function(){ el.replaceChild(img, el.querySelector('b')); };
+    img.src = el.dataset.logo;
+  });
+  var keys = {};
+  document.querySelectorAll('#keys .key').forEach(function(el){ keys[el.dataset.k] = el; });
+  function light(k){
+    var el = keys[k]; if(!el) return;
+    el.classList.add('lit'); setTimeout(function(){ el.classList.remove('lit'); }, 180);
+  }
+  document.addEventListener('keydown', function(e){
+    if(e.metaKey || e.ctrlKey || e.altKey) return;
+    var k = e.key === 'Spacebar' ? ' ' : (e.key || '').toLowerCase();
+    if(keys[k]){ if(k === ' ') e.preventDefault(); light(k); }
+  });
+  Object.keys(keys).forEach(function(k){ keys[k].addEventListener('pointerdown', function(){ light(k); }); });
+  // one small welcome: the keys light in order once on load
+  if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+    ['h','o','m','e'].forEach(function(k, i){ setTimeout(function(){ light(k); }, 500 + i*180); });
+  }
+})();
+</script>
+</body>
+</html>
