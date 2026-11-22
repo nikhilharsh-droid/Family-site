@@ -107,6 +107,14 @@ h2{font-family:var(--display);font-weight:800;font-size:clamp(30px,4.5vw,48px);l
 .howto h3{font-family:var(--display);font-weight:700;font-size:20px;margin:0}
 .howto ol{margin:0;padding-left:20px;color:var(--muted);font-size:15px;display:grid;gap:6px}
 
+.familycard{margin-top:18px;padding:20px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;text-decoration:none;transition:transform .25s,border-color .25s}
+.familycard:hover{transform:translateY(-3px);border-color:rgba(46,196,182,.6)}
+.familycard .ft{display:flex;align-items:center;gap:14px}
+.familycard .lock{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;font-size:22px;background:linear-gradient(135deg,rgba(46,196,182,.35),rgba(255,182,39,.25));border:1px solid var(--line)}
+.familycard b{display:block;font-family:var(--display);font-weight:700;font-size:21px;letter-spacing:-.01em}
+.familycard span.sub{color:var(--muted);font-size:15px}
+.familycard .go{font-weight:600;font-size:15px;padding:10px 18px;border-radius:999px;background:var(--ink);color:#14122B;white-space:nowrap}
+
 /* work */
 .work{display:grid;grid-template-columns:1fr 1.4fr;gap:18px}
 .work .intro{padding:28px;display:grid;gap:12px;align-content:start}
@@ -161,6 +169,7 @@ footer{padding:40px 0 56px;color:var(--muted);font-size:14px;display:flex;justif
     <div class="navlinks">
       <a class="keep" href="#play">Play</a>
       <a href="#work">Work</a>
+      <a class="keep" href="https://family.nikhilharsh.com">Family 🔒</a>
     </div>
   </nav>
 
@@ -198,6 +207,13 @@ footer{padding:40px 0 56px;color:var(--muted);font-size:14px;display:flex;justif
         </div>
       </div>
     </div>
+  </section>
+
+  <section id="family" style="padding-top:0">
+    <a class="card familycard" href="https://family.nikhilharsh.com">
+      <div class="ft"><div class="lock" aria-hidden="true">🔒</div><div><b>Family area</b><span class="sub">For family members only. Sign in with Google.</span></div></div>
+      <span class="go">Open <span aria-hidden="true">→</span></span>
+    </a>
   </section>
 
   <section id="work">
