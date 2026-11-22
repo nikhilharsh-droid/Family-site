@@ -106,7 +106,7 @@ h2{font-family:var(--display);font-weight:800;font-size:clamp(30px,4.5vw,48px);l
 .row b{display:block;font-family:var(--display);font-weight:700;font-size:20px;letter-spacing:-.01em}
 .row span{color:var(--muted);font-size:15px}
 
-.companies{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:18px}
+.companies{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-top:18px}
 .co{display:grid;place-items:center;gap:4px;min-height:92px;padding:16px;text-align:center}
 .co b{font-family:var(--display);font-weight:800;font-size:22px;letter-spacing:-.02em;line-height:1}
 .co img{max-height:36px;max-width:80%;filter:brightness(0) invert(1);opacity:.92}
@@ -114,7 +114,7 @@ h2{font-family:var(--display);font-weight:800;font-size:clamp(30px,4.5vw,48px);l
 .li{justify-self:start;display:inline-flex;align-items:center;gap:10px;font-weight:600;font-size:16px;padding:12px 20px;border-radius:999px;text-decoration:none;background:#0A66C2;color:#fff;transition:transform .2s}
 .li:hover{transform:translateY(-2px)}
 .li[hidden]{display:none}
-@media (max-width:520px){ .companies{grid-template-columns:1fr} .co{min-height:72px} }
+@media (max-width:520px){ .companies{grid-template-columns:1fr 1fr} .co{min-height:72px} }
 
 footer{padding:40px 0 56px;color:var(--muted);font-size:14px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;border-top:1px solid var(--line);margin-top:24px}
 
@@ -207,6 +207,10 @@ footer{padding:40px 0 56px;color:var(--muted);font-size:14px;display:flex;justif
       <div class="card co" data-logo="https://www.bigscoots.com/wp-content/uploads/2022/10/bigscoots-logo-white.svg"><b>BigScoots</b><span>President</span></div>
       <div class="card co" data-logo="assets/logos/datto.svg"><b>Datto</b><span>VC to PE to IPO</span></div>
       <div class="card co" data-logo="https://www.invernessgraham.com/wp-content/uploads/logo-white.svg"><b>Inverness Graham</b><span>Private equity</span></div>
+      <div class="card co" data-logo="https://www.cytracom.com/images/cytracom-logo.svg"><b>Cytracom</b></div>
+      <div class="card co" data-logo="https://www.alloy.com/static/img/logo.svg"><b>Alloy</b></div>
+      <div class="card co" data-logo="https://www.bankofamerica.com/content/images/ContextualSiteGraphics/Logos/en_US/logos/colored_flagscape-v2.png"><b>Bank of America</b></div>
+      <div class="card co" data-logo="https://www17.wellsfargomedia.com/assets/images/rwd/wf_logo_220x23.png"><b>Wells Fargo</b></div>
     </div>
   </section>
 
