@@ -17,10 +17,16 @@
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Figtree:wght@400;500;600&display=swap">
+<link rel="preload" href="/assets/fonts/bricolage.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/figtree-400.woff2" as="font" type="font/woff2" crossorigin>
 <style>
+/* fonts are served from this site (SIL Open Font License), no third-party requests */
+@font-face{font-family:"Bricolage Grotesque";src:url(/assets/fonts/bricolage.woff2) format("woff2");font-weight:200 800;font-display:swap}
+@font-face{font-family:"Figtree";src:url(/assets/fonts/figtree-400.woff2) format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"Figtree";src:url(/assets/fonts/figtree-500.woff2) format("woff2");font-weight:500;font-display:swap}
+@font-face{font-family:"Figtree";src:url(/assets/fonts/figtree-600.woff2) format("woff2");font-weight:600;font-display:swap}
+.skip{position:absolute;left:12px;top:-60px;z-index:50;background:var(--marigold);color:#14122B;font-weight:700;padding:10px 16px;border-radius:999px;text-decoration:none}
+.skip:focus{top:12px}
 /* Layout: one dark night-sky page lit by a slow coral/marigold/aqua glow; keycaps are the motif, games get the big stage, work stays small. */
 :root{
   --bg:#0B0D1F;
@@ -59,6 +65,7 @@ a{color:inherit}
 .orb.sun{border-radius:50%;background:radial-gradient(circle,#FFF6D6 0 38%,#FFD166 52%,rgba(255,182,39,0) 72%);filter:drop-shadow(0 0 40px rgba(255,200,90,.7))}
 .skyline{color:var(--muted);font-weight:500;letter-spacing:.08em}
 .orb[hidden]{display:none}
+.season{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
 .grain{position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse at top,transparent 30%,rgba(11,13,31,.65) 80%)}
 
 .wrap{position:relative;z-index:1;width:min(1120px,100% - 40px);margin:0 auto}
@@ -82,7 +89,7 @@ h1 .grad{background:linear-gradient(100deg,var(--coral) 10%,var(--marigold) 50%,
 
 /* keycaps */
 .keys{display:flex;flex-wrap:wrap;gap:10px}
-.key{--c:var(--coral);width:62px;height:62px;border-radius:14px;display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:26px;
+.key{font-family:var(--display);color:var(--ink);padding:0;-webkit-appearance:none;appearance:none;--c:var(--coral);width:62px;height:62px;border-radius:14px;display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:26px;
   background:linear-gradient(180deg,rgba(255,255,255,.14),rgba(255,255,255,.04));border:1px solid var(--line);
   box-shadow:inset 0 -5px 0 rgba(0,0,0,.35),0 8px 22px rgba(0,0,0,.35);transition:transform .12s,box-shadow .12s,background .12s;user-select:none;cursor:pointer}
 .key.lit,.key:active{transform:translateY(3px);background:var(--c);color:#14122B;box-shadow:inset 0 -2px 0 rgba(0,0,0,.25),0 0 28px var(--c)}
@@ -200,11 +207,13 @@ footer{padding:40px 0 56px;color:var(--muted);font-size:14px;display:flex;justif
 <div class="glow" aria-hidden="true"><i></i><i></i><i></i></div>
 <div class="stars" id="stars" aria-hidden="true"></div>
 <div class="orb" id="orb" aria-hidden="true"></div>
+<canvas class="season" id="season" aria-hidden="true"></canvas>
 <div class="grain" aria-hidden="true"></div>
 
+<a class="skip" href="#play">Skip to the games</a>
 <div class="wrap">
   <div class="navbar" id="navbar"><nav>
-    <a class="brand" href="#top"><span class="dot" aria-hidden="true"></span><span class="bname">Harsh Family</span></a>
+    <a class="brand" href="#top" aria-label="Harsh Family, back to top"><span class="dot" aria-hidden="true"></span><span class="bname">Harsh Family</span></a>
     <div class="navlinks">
       <a href="#play" data-sec="play">Play</a>
       <a href="#art" data-sec="art" id="navart" hidden>Art</a>
@@ -213,12 +222,13 @@ footer{padding:40px 0 56px;color:var(--muted);font-size:14px;display:flex;justif
     </div>
   </nav></div>
 
+  <main id="main">
   <header class="hero" id="top">
     <div class="eyebrow">Chapel Hill, NC<span class="skyline" id="skyline"></span></div>
     <h1>Home base for the <span class="grad">Harsh family.</span></h1>
     <p class="lede">The games we make, the things we're into, and where to find Nikhil at work.</p>
-    <div class="keys" id="keys" aria-label="Keyboard toy: type H, O, M or E">
-      <div class="key" data-k="h">H</div><div class="key" data-k="o">O</div><div class="key" data-k="m">M</div><div class="key" data-k="e">E</div><div class="key space" data-k=" ">SPACE</div>
+    <div class="keys" id="keys" role="group" aria-label="Keyboard toy: tap or type H, O, M or E">
+      <button type="button" class="key" data-k="h">H</button><button type="button" class="key" data-k="o">O</button><button type="button" class="key" data-k="m">M</button><button type="button" class="key" data-k="e">E</button><button type="button" class="key space" data-k=" " aria-label="Space">SPACE</button>
     </div>
     <p class="keyhint">Go on, tap the keys. Home row hands ready.</p>
   </header>
@@ -253,7 +263,7 @@ footer{padding:40px 0 56px;color:var(--muted);font-size:14px;display:flex;justif
     <div class="sechead reveal"><h2>From the art wall</h2><p>Made in Doodle Studio.</p></div>
     <div class="artgrid reveal" id="artgrid"></div>
   </section>
-  <div class="artview" id="artview" hidden><img id="artbig" alt="A drawing from the family art wall"></div>
+  <div class="artview" id="artview" role="dialog" aria-label="Drawing" hidden><img id="artbig" alt="A drawing from the family art wall"></div>
 
   <section id="family" style="padding-top:0">
     <a class="card familycard reveal" href="https://family.nikhilharsh.com">
@@ -288,6 +298,7 @@ footer{padding:40px 0 56px;color:var(--muted);font-size:14px;display:flex;justif
     </div>
   </section>
 
+  </main>
   <footer>
     <span>© 2026 The Harsh family</span>
     <span>Made at home in Chapel Hill.</span>
@@ -302,7 +313,7 @@ footer{padding:40px 0 56px;color:var(--muted);font-size:14px;display:flex;justif
   // Company logos: data-logo points at each company's official logo file (on its own site, or in assets/logos/).
   // If the file loads it replaces the name; if not, the name stays.
   document.querySelectorAll('.co[data-logo]').forEach(function(el){
-    var img = new Image(); img.alt = el.querySelector('b').textContent;
+    var img = new Image(); img.alt = el.querySelector('b').textContent; img.decoding = 'async'; img.loading = 'lazy'; img.referrerPolicy = 'no-referrer';
     img.onload = function(){ el.replaceChild(img, el.querySelector('b')); };
     img.src = el.dataset.logo;
   });
@@ -317,7 +328,7 @@ footer{padding:40px 0 56px;color:var(--muted);font-size:14px;display:flex;justif
     var k = e.key === 'Spacebar' ? ' ' : (e.key || '').toLowerCase();
     if(keys[k]){ if(k === ' ') e.preventDefault(); light(k); }
   });
-  Object.keys(keys).forEach(function(k){ keys[k].addEventListener('pointerdown', function(){ light(k); }); });
+  Object.keys(keys).forEach(function(k){ keys[k].addEventListener('pointerdown', function(){ light(k); }); keys[k].addEventListener('click', function(e){ if(e.detail === 0) light(k); }); });
   // sticky bar: solid once scrolled; the current section's pill lights up
   var bar = document.getElementById('navbar');
   function onScroll(){ bar.classList.toggle('stuck', window.scrollY > 40); }
@@ -384,6 +395,79 @@ footer{padding:40px 0 56px;color:var(--muted);font-size:14px;display:flex;justif
       line.textContent = ' · ' + time + ' · ' + c.name;
     }
     update(); setInterval(update, 60000);
+  })();
+  // seasonal themes: the page decorates itself by date in Chapel Hill (add ?season=snow|fireworks|halloween|diwali|hearts to preview)
+  (function(){
+    var cv = document.getElementById('season'), ctx = cv.getContext('2d');
+    var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var ny = new Date(new Date().toLocaleString('en-US', {timeZone:'America/New_York'})), y = ny.getFullYear(), mo = ny.getMonth() + 1, d = ny.getDate();
+    var md = mo*100 + d;
+    // Diwali (main day) by year; the lights stay up for five days around it
+    var DIWALI = {2026:'11-08', 2027:'10-29', 2028:'10-17', 2029:'11-05', 2030:'10-26', 2031:'11-14', 2032:'11-02'};
+    var dv = DIWALI[y], diwali = false;
+    if(dv){ var dd = new Date(y, +dv.slice(0,2) - 1, +dv.slice(3)); diwali = Math.abs((ny - dd)/864e5) <= 2.5; }
+    var theme = null;
+    if(md === 1231 || md === 101 || md === 704) theme = 'fireworks';
+    else if(diwali) theme = 'diwali';
+    else if(md >= 1201 && md <= 1230) theme = 'snow';
+    else if(md >= 1020 && md <= 1031) theme = 'halloween';
+    else if(md >= 210 && md <= 214) theme = 'hearts';
+    var forced = (location.search.match(/[?&]season=(\w+)/) || [])[1];
+    if(forced) theme = ['snow','fireworks','halloween','diwali','hearts'].indexOf(forced) >= 0 ? forced : null;
+    if(!theme) return;
+    var W, H, DPR = Math.min(window.devicePixelRatio || 1, 2), parts = [], t0 = performance.now();
+    function size(){ W = innerWidth; H = innerHeight; cv.width = W*DPR; cv.height = H*DPR; ctx.setTransform(DPR,0,0,DPR,0,0); }
+    size(); addEventListener('resize', size);
+    var R = Math.random, many = W < 600 ? .55 : 1;
+    function spawn(kind){
+      if(kind === 'snow') return {x:R()*W, y:-10 - R()*H, r:1 + R()*3, vy:.3 + R()*.8, sw:R()*6.28, a:.45 + R()*.5};
+      if(kind === 'hearts') return {x:R()*W, y:H + 20 + R()*H, s:12 + R()*16, vy:.25 + R()*.5, sw:R()*6.28, a:.35 + R()*.4};
+      if(kind === 'halloween') return {x:-40 - R()*W, y:40 + R()*H*.5, s:16 + R()*14, vx:.4 + R()*.7, sw:R()*6.28, a:.5 + R()*.3, e:R() < .7 ? '🦇' : '🎃'};
+    }
+    if(theme === 'snow') for(var i = 0; i < 140*many; i++){ var p = spawn('snow'); p.y = R()*H; parts.push(p); }
+    if(theme === 'hearts') for(var i = 0; i < 26*many; i++){ var p = spawn('hearts'); p.y = R()*H; parts.push(p); }
+    if(theme === 'halloween') for(var i = 0; i < 10*many; i++){ var p = spawn('halloween'); p.x = R()*W; parts.push(p); }
+    var bursts = [], nextBurst = 0, COLS = ['#FF5E5B','#FFB627','#2EC4B6','#8E5CF7','#FF6FB5','#FFFFFF'];
+    function burst(){
+      var cx = W*(.15 + R()*.7), cy = H*(.12 + R()*.35), c = COLS[(R()*COLS.length)|0], n = 46;
+      for(var i = 0; i < n; i++){ var a = i/n*6.283, v = 1.6 + R()*2.2; bursts.push({x:cx, y:cy, vx:Math.cos(a)*v, vy:Math.sin(a)*v, life:1, c:c}); }
+    }
+    function lights(t){
+      // a garland of warm diyas along the top of the screen
+      var n = Math.max(9, Math.round(W/70)), sag = 26;
+      ctx.strokeStyle = 'rgba(255,214,130,.35)'; ctx.lineWidth = 1.5; ctx.beginPath();
+      for(var i = 0; i <= 40; i++){ var x = i/40*W, yy = 6 + Math.sin(i/40*Math.PI*(n/3)) * 0 + sag*Math.abs(Math.sin(i/40*Math.PI*3)); i ? ctx.lineTo(x, yy) : ctx.moveTo(x, yy); }
+      ctx.stroke();
+      for(var j = 0; j < n; j++){
+        var fx = (j + .5)/n, x = fx*W, yy = 6 + sag*Math.abs(Math.sin(fx*Math.PI*3)) + 4;
+        var tw = reduce ? 1 : .65 + .35*Math.sin(t/400 + j*1.7);
+        var g = ctx.createRadialGradient(x, yy, 0, x, yy, 18); g.addColorStop(0, 'rgba(255,200,90,' + (.85*tw) + ')'); g.addColorStop(1, 'rgba(255,140,40,0)');
+        ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, yy, 18, 0, 6.283); ctx.fill();
+        ctx.fillStyle = ['#FFB627','#FF5E5B','#FFD166'][j % 3]; ctx.beginPath(); ctx.arc(x, yy, 3.5, 0, 6.283); ctx.fill();
+      }
+    }
+    function frame(t){
+      ctx.clearRect(0, 0, W, H);
+      var k = (t - t0)/1000;
+      if(theme === 'diwali') lights(t);
+      parts.forEach(function(p){
+        if(theme === 'snow'){ p.y += p.vy; p.x += Math.sin(k + p.sw)*.3; if(p.y > H + 5){ var q = spawn('snow'); q.y = -5; Object.assign(p, q); }
+          ctx.globalAlpha = p.a; ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, 6.283); ctx.fill(); }
+        if(theme === 'hearts'){ p.y -= p.vy; p.x += Math.sin(k + p.sw)*.4; if(p.y < -30){ Object.assign(p, spawn('hearts')); p.y = H + 20; }
+          ctx.globalAlpha = p.a; ctx.font = p.s + 'px serif'; ctx.fillText('💗', p.x, p.y); }
+        if(theme === 'halloween'){ p.x += p.vx; p.y += Math.sin(k*2 + p.sw)*.6; if(p.x > W + 40){ Object.assign(p, spawn('halloween')); p.x = -40; }
+          ctx.globalAlpha = p.a; ctx.font = p.s + 'px serif'; ctx.fillText(p.e, p.x, p.y); }
+      });
+      if(theme === 'fireworks'){
+        if(t > nextBurst){ burst(); nextBurst = t + 900 + R()*1400; }
+        bursts = bursts.filter(function(b){ b.x += b.vx; b.y += b.vy; b.vy += .03; b.vx *= .985; b.life -= .012; return b.life > 0; });
+        bursts.forEach(function(b){ ctx.globalAlpha = Math.max(0, b.life); ctx.fillStyle = b.c; ctx.beginPath(); ctx.arc(b.x, b.y, 2.2, 0, 6.283); ctx.fill(); });
+      }
+      ctx.globalAlpha = 1;
+      if(!reduce) requestAnimationFrame(frame);
+    }
+    if(reduce && theme === 'fireworks'){ for(var b = 0; b < 3; b++) burst(); bursts.forEach(function(p){ for(var s = 0; s < 30; s++){ p.x += p.vx; p.y += p.vy; } }); }
+    requestAnimationFrame(frame);
   })();
   // one small welcome: the keys light in order once on load
   if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches){
