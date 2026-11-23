@@ -79,7 +79,7 @@ footer{padding:10px 12px 12px;display:grid;gap:10px}
 <div class="toast" id="toast"></div>
 <script>
 (function(){
-const TOOLS = [['pen','✏️','Pencil'],['marker','🖍️','Marker'],['fill','🪣','Fill'],['eraser','🧽','Eraser'],['sticker','⭐','Stickers'],['text','🔤','Words'],['comic','💬','Comic']];
+const TOOLS = [['pen','✏️','Pencil'],['marker','🖍️','Marker'],['fill','🪣','Fill'],['eraser','🧽','Eraser'],['sticker','⭐','Stickers'],['text','🔤','Words'],['comic','💬','Comic'],['shape','🔷','Shapes'],['template','🖼️','Templates']];
 const COLORS = ['#2B2340','#FF5E5B','#FF8A3D','#FFB627','#FFE14D','#7ED957','#2EC4B6','#3A86FF','#8E5CF7','#FF6FB5','#8B5A2B','#FFFFFF'];
 const SIZES = [4,10,22];
 const LAYOUTS = {
@@ -89,13 +89,27 @@ const LAYOUTS = {
   four: [[0,0,.5,.5],[.5,0,.5,.5],[0,.5,.5,.5],[.5,.5,.5,.5]],
   six:  [[0,0,.5,1/3],[.5,0,.5,1/3],[0,1/3,.5,1/3],[.5,1/3,.5,1/3],[0,2/3,.5,1/3],[.5,2/3,.5,1/3]]
 };
+const STAR = (() => { let d = ''; for(let i = 0; i < 10; i++){ const r = i % 2 ? 19 : 46, a = -Math.PI/2 + i*Math.PI/5; d += (i ? 'L' : 'M') + (50 + r*Math.cos(a)).toFixed(1) + ' ' + (53 + r*Math.sin(a)).toFixed(1); } return d + 'Z'; })();
+const SHAPES = {
+  heart: 'M50 88C20 66 6 50 6 32C6 18 17 8 30 8C40 8 46 14 50 21C54 14 60 8 70 8C83 8 94 18 94 32C94 50 80 66 50 88Z',
+  star: STAR,
+  circle: 'M50 6A44 44 0 1 1 49.99 6Z',
+  square: 'M10 10H90V90H10Z',
+  triangle: 'M50 8L94 90H6Z',
+  arrow: 'M6 38H56V16L94 50L56 84V62H6Z',
+  bolt: 'M58 4L18 56H46L38 96L82 40H54Z',
+  cloud: 'M28 78C14 78 6 68 6 58C6 47 15 39 26 40C28 26 39 18 52 18C66 18 76 28 78 40C88 40 94 48 94 58C94 70 86 78 74 78Z',
+  moon: 'M62 6A44 44 0 1 0 94 68A36 36 0 1 1 62 6Z'
+};
+const TEMPLATES = [['birthday','🎂','Birthday'],['thanks','💐','Thank you'],['weekend','📅','My weekend'],['color','🏠','Coloring'],['sea','🐠','Under the sea']];
+const shapeSVG = (k, fill, px) => `<svg viewBox="0 0 100 100" width="${px}" height="${px}" style="display:block;overflow:visible"><path d="${SHAPES[k]}" ${fill ? 'fill="currentColor"' : 'fill="none" stroke="currentColor" stroke-width="7" stroke-linejoin="round"'}/></svg>`;
 const STICKERS = ['⭐','❤️','🌈','🦄','🐱','🐶','🌸','🌻','☀️','🌙','🎈','🎂','🍓','🦋','👑','💎','🐠','🚀','⚽','🎨','😀','😍','🥳','✨'];
 const store = { get(k,v){ try{ const x = localStorage.getItem(k); return x===null ? v : JSON.parse(x); }catch(e){ return v; } },
                 set(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); return true; }catch(e){ return false; } } };
 
 const stage = document.getElementById('stage'), cv = document.getElementById('cv'), ctx = cv.getContext('2d', {willReadFrequently:true});
 const ctl = document.getElementById('ctl');
-let bubbleKind = 'say', tool = 'pen', color = COLORS[1], size = 1, sticker = STICKERS[0];
+let shapeName = 'heart', shapeFill = true, bubbleKind = 'say', tool = 'pen', color = COLORS[1], size = 1, sticker = STICKERS[0];
 let W = 0, H = 0, DPR = 1, items = [], selected = null, history = [];
 
 // ---------- layout ----------
@@ -124,6 +138,16 @@ function renderOpts(){
       + `<button class="stick ${bubbleKind==='say'?'on':''}" data-b="say" aria-label="speech bubble">💬</button><button class="stick ${bubbleKind==='think'?'on':''}" data-b="think" aria-label="thought bubble">💭</button><button class="stick ${bubbleKind==='shout'?'on':''}" data-b="shout" aria-label="shout bubble">💥</button>`;
     return;
   }
+  if(tool === 'shape'){
+    optsEl.innerHTML = Object.keys(SHAPES).map(k => `<button class="stick ${k===shapeName?'on':''}" data-sh="${k}" aria-label="${k}" style="color:${color==='#FFFFFF'?'#2B2340':color}">${shapeSVG(k, shapeFill, 30)}</button>`).join('')
+      + `<span class="sep"></span><button class="stick" data-fl="1" aria-label="filled or outline" style="width:auto;padding:0 12px;font-size:14px;font-weight:800">${shapeFill ? 'Filled' : 'Outline'}</button><span class="sep"></span>`
+      + COLORS.map(c => `<button class="sw ${c===color?'on':''}" data-c="${c}" style="background:${c}" aria-label="color"></button>`).join('');
+    return;
+  }
+  if(tool === 'template'){
+    optsEl.innerHTML = TEMPLATES.map(([k,e,n]) => `<button class="tool" data-tp="${k}"><b>${e}</b>${n}</button>`).join('');
+    return;
+  }
   if(tool === 'sticker'){
     optsEl.innerHTML = STICKERS.map(s => `<button class="stick ${s===sticker?'on':''}" data-s="${s}">${s}</button>`).join('');
   } else {
@@ -136,7 +160,10 @@ optsEl.onclick = e => {
   const b = e.target.closest('button'); if(!b) return;
   if(b.dataset.l){ snap(); select(null); setItems([]); comicPage(LAYOUTS[b.dataset.l]); save(); toast('Tap 💬 then tap a box to add talking'); return; }
   if(b.dataset.b) bubbleKind = b.dataset.b;
-  if(b.dataset.c){ color = b.dataset.c; if(selected && selected.kind === 'text'){ selected.color = color; paint(selected); save(); } }
+  if(b.dataset.sh) shapeName = b.dataset.sh;
+  if(b.dataset.fl){ shapeFill = !shapeFill; if(selected && selected.kind === 'shape'){ snap(); selected.fill = shapeFill; paint(selected); save(); } }
+  if(b.dataset.tp){ snap(); select(null); setItems([]); template(b.dataset.tp); save(); toast('Make it yours! (Undo goes back)'); return; }
+  if(b.dataset.c){ color = b.dataset.c; if(selected && (selected.kind === 'text' || selected.kind === 'shape')){ selected.color = color; paint(selected); save(); } }
   if(b.dataset.z) size = +b.dataset.z;
   if(b.dataset.s) sticker = b.dataset.s;
   renderOpts();
@@ -144,7 +171,7 @@ optsEl.onclick = e => {
 
 // ---------- history ----------
 function snap(){ history.push({img: cv.toDataURL(), items: JSON.stringify(items.map(plain))}); if(history.length > 20) history.shift(); }
-function plain(it){ return {kind:it.kind, text:it.text, x:it.x, y:it.y, s:it.s, r:it.r, color:it.color}; }
+function plain(it){ return {kind:it.kind, shape:it.shape, fill:it.fill, text:it.text, x:it.x, y:it.y, s:it.s, r:it.r, color:it.color}; }
 document.getElementById('undo').onclick = () => {
   const h = history.pop(); if(!h){ toast('Nothing to undo'); return; }
   select(null); drawImg(h.img, save); setItems(JSON.parse(h.items));
@@ -163,6 +190,56 @@ function comicPage(lay){
   }
   ctx.restore();
 }
+function outline(d, x, y, size, fill){
+  ctx.save(); ctx.translate(x, y); ctx.scale(size/100, size/100); const p = new Path2D(d);
+  if(fill){ ctx.fillStyle = fill; ctx.fill(p); } ctx.strokeStyle = '#2B2340'; ctx.lineWidth = 400/size; ctx.lineJoin = 'round'; ctx.stroke(p); ctx.restore();
+}
+function bg(top, bottom){ const g = ctx.createLinearGradient(0, 0, 0, H); g.addColorStop(0, top); g.addColorStop(1, bottom); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H); }
+function confetti(n, cols){ for(let i = 0; i < n; i++){ ctx.fillStyle = cols[i % cols.length]; ctx.globalAlpha = .7; ctx.beginPath(); ctx.arc(Math.random()*W, Math.random()*H, 3 + Math.random()*5, 0, Math.PI*2); ctx.fill(); } ctx.globalAlpha = 1; }
+function template(k){
+  paper(); const m = Math.min(W, H), T = (text, x, y, s, color, r=0) => addItem({kind:'text', text, x:x*W, y:y*H, s:s*m, r, color});
+  const S = (text, x, y, s, r=0) => addItem({kind:'sticker', text, x:x*W, y:y*H, s:s*m, r});
+  if(k === 'birthday'){
+    bg('#FFE3F1', '#FFF6D6'); confetti(70, ['#FF5E5B','#FFB627','#2EC4B6','#8E5CF7','#3A86FF']);
+    T('Happy', .5, .2, .13, '#FF5E5B', -4); T('Birthday!', .5, .34, .15, '#8E5CF7', -4);
+    S('🎂', .5, .6, .3); S('🎈', .16, .55, .16, -10); S('🎈', .84, .5, .16, 10); S('🎉', .8, .84, .13); S('🎁', .2, .85, .13);
+    T('To: ______', .5, .9, .055, '#2B2340');
+  }
+  if(k === 'thanks'){
+    bg('#DFF7EF', '#E9F0FF'); confetti(40, ['#2EC4B6','#FF6FB5','#FFB627']);
+    T('Thank', .5, .22, .16, '#2EC4B6', -3); T('You!', .5, .38, .18, '#FF6FB5', -3);
+    S('💐', .5, .65, .28); S('❤️', .2, .6, .1, -12); S('🌟', .8, .58, .1, 12); S('🦋', .78, .84, .1);
+    T('From: ______', .5, .89, .055, '#2B2340');
+  }
+  if(k === 'weekend'){
+    comicPage(LAYOUTS.four);
+    const sm = Math.max(14, m*.04);
+    [['Friday', .06, .04], ['Saturday', .56, .04], ['Sunday', .06, .54], ['Best part!', .56, .54]].forEach(([t, x, y]) => addItem({kind:'shout', text:t, x:x*W + sm*3, y:y*H + sm*1.2, s:sm, r:-3, color:'#2B2340'}));
+  }
+  if(k === 'color'){
+    const gy = H*.8, hs = Math.min(W*.46, H*.4), cx = W*.56;
+    ctx.strokeStyle = '#2B2340'; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(0, gy); ctx.lineTo(W, gy); ctx.stroke();
+    outline(SHAPES.circle, W*.05, H*.04, Math.min(W, H)*.22, '#fff');
+    outline(SHAPES.cloud, W*.58, H*.05, Math.min(W*.36, H*.3), '#fff');
+    // house: roof, walls, door, windows
+    const hx = cx - hs/2, hy = gy - hs;
+    outline('M15 45H85V100H15Z', hx, hy, hs, '#fff'); outline('M50 5L96 46H4Z', hx, hy, hs, '#fff');
+    outline('M42 68H58V100H42Z', hx, hy, hs, '#fff'); outline('M22 56H35V69H22Z', hx, hy, hs, '#fff'); outline('M65 56H78V69H65Z', hx, hy, hs, '#fff');
+    // tree on the left
+    const ts = Math.min(W*.28, H*.34), tx = Math.max(W*.02, hx - ts*.95);
+    outline('M44 55H56V100H44Z', tx, gy - ts, ts, '#fff'); outline('M50 4C72 4 90 20 90 38C90 56 72 64 50 64C28 64 10 56 10 38C10 20 28 4 50 4Z', tx, gy - ts, ts, '#fff');
+    // flowers along the bottom
+    const fs = Math.min(W*.14, H*.12);
+    const base = H - (H-gy)*.1, f2 = fs*.8;
+    for(let i = 0; i < 4; i++){ const fx = W*.06 + i*(W*.88 - fs)/3; outline('M48 50H52V100H48Z', fx, base - fs, fs, '#fff'); outline(SHAPES.star, fx + fs/2 - f2/2, base - fs/2 - f2*.86, f2, '#fff'); }
+    toast('Pick Fill 🪣 and tap to color it in');
+  }
+  if(k === 'sea'){
+    bg('#9EE7FF', '#2F7DD1'); ctx.fillStyle = '#F6D58E'; ctx.beginPath(); ctx.ellipse(W/2, H*1.02, W*.8, H*.16, 0, 0, Math.PI*2); ctx.fill();
+    for(let i = 0; i < 25; i++){ ctx.strokeStyle = 'rgba(255,255,255,.7)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(Math.random()*W, Math.random()*H*.8, 3 + Math.random()*9, 0, Math.PI*2); ctx.stroke(); }
+    S('🐠', .25, .3, .14); S('🐟', .72, .2, .11, 8); S('🐙', .7, .62, .2); S('🐚', .2, .9, .09); S('🦀', .5, .92, .1); S('🪸', .88, .86, .14); S('🐳', .32, .55, .18, -6);
+  }
+}
 function isBlank(){ const d = ctx.getImageData(0,0,cv.width,cv.height).data; for(let i=0;i<d.length;i+=4*97) if(d[i]!==255||d[i+1]!==255||d[i+2]!==255) return false; return true; }
 
 // ---------- drawing ----------
@@ -170,8 +247,9 @@ let drawing = null;
 cv.addEventListener('pointerdown', e => {
   const p = pt(e);
   if(textIn) { commitText(); return; }
-  if(selected){ select(null); if(tool==='sticker') return; }
+  if(selected){ select(null); if(tool==='sticker'||tool==='shape') return; }
   if(tool === 'fill'){ snap(); flood(p.x, p.y, color); save(); return; }
+  if(tool === 'shape'){ snap(); select(addItem({kind:'shape', shape:shapeName, fill:shapeFill, text:'', x:p.x, y:p.y, s:110, r:0, color})); save(); return; }
   if(tool === 'sticker'){ snap(); select(addItem({kind:'sticker', text:sticker, x:p.x, y:p.y, s:64, r:0})); save(); return; }
   if(tool === 'text'){ e.preventDefault(); openText(p, 'text'); return; }
   if(tool === 'comic'){ e.preventDefault(); openText(p, bubbleKind); return; }
@@ -242,7 +320,8 @@ function addItem(it){
 function setItems(list){ items.forEach(it => it.el.remove()); items = []; list.forEach(addItem); }
 function paint(it){
   it.el.className = 'item' + (it.kind==='say'||it.kind==='think'||it.kind==='shout' ? ' bub ' + it.kind : '') + (it === selected ? ' sel' : '');
-  it.el.textContent = it.text; it.el.style.fontSize = it.s + 'px';
+  if(it.kind === 'shape'){ it.el.innerHTML = shapeSVG(it.shape, it.fill, it.s); it.el.style.fontSize = ''; }
+  else { it.el.textContent = it.text; it.el.style.fontSize = it.s + 'px'; }
   it.el.style.color = it.kind === 'sticker' ? '' : it.color;
   it.el.style.textShadow = it.kind === 'text' && it.color === '#FFFFFF' ? '0 0 3px #2B2340' : '';
   const w = it.el.offsetWidth, h = it.el.offsetHeight;
@@ -278,7 +357,7 @@ function place(){
 ctl.onclick = e => {
   const b = e.target.closest('button'); if(!b || !selected) return; snap();
   const a = b.dataset.a, it = selected;
-  if(a === 'bigger') it.s = Math.min(320, it.s * 1.25);
+  if(a === 'bigger') it.s = Math.min(it.kind === 'shape' ? 700 : 320, it.s * 1.25);
   if(a === 'smaller') it.s = Math.max(16, it.s / 1.25);
   if(a === 'turn') it.r = (it.r + 15) % 360;
   if(a === 'del'){ it.el.remove(); items = items.filter(i => i !== it); select(null); save(); return; }
@@ -311,6 +390,8 @@ function compose(){
     o.save(); o.translate(it.x, it.y); o.rotate(it.r * Math.PI/180);
     o.font = `900 ${it.s}px ui-rounded, system-ui, sans-serif`; o.textAlign = 'center'; o.textBaseline = 'middle';
     if(it.kind === 'say' || it.kind === 'think' || it.kind === 'shout'){ bubble(o, it); o.restore(); continue; }
+    if(it.kind === 'shape'){ o.scale(it.s/100, it.s/100); o.translate(-50, -50); const path = new Path2D(SHAPES[it.shape]);
+      if(it.fill){ o.fillStyle = it.color; o.fill(path); } else { o.strokeStyle = it.color; o.lineWidth = 7; o.lineJoin = 'round'; o.stroke(path); } o.restore(); continue; }
     o.fillStyle = it.kind === 'text' ? it.color : '#000';
     if(it.kind === 'text' && it.color === '#FFFFFF'){ o.shadowColor = '#2B2340'; o.shadowBlur = 3; }
     o.fillText(it.text, 0, it.s*0.05); o.restore();
@@ -342,13 +423,15 @@ function bubble(o, it){
 document.getElementById('save').onclick = () => {
   select(null);
   compose().toBlob(async blob => {
-    const name = 'doodle-' + new Date().toISOString().slice(0,10) + '.png';
+    const name = 'doodle-' + new Date().toLocaleDateString('en-CA') + '.png';
     const file = new File([blob], name, {type:'image/png'});
     try{
-      if(navigator.canShare && navigator.canShare({files:[file]})){ await navigator.share({files:[file], title:'My doodle'}); return; }
+      // phones and iPads get the share sheet (Save Image); Chromebooks and computers download straight to Downloads
+      const mobile = /iPhone|iPad|Android/i.test(navigator.userAgent) || (navigator.maxTouchPoints > 1 && /Macintosh/.test(navigator.userAgent));
+      if(mobile && !/CrOS/.test(navigator.userAgent) && navigator.canShare && navigator.canShare({files:[file]})){ await navigator.share({files:[file], title:'My doodle'}); return; }
     }catch(e){ if(e && e.name === 'AbortError') return; }
     const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; a.click();
-    setTimeout(() => URL.revokeObjectURL(a.href), 4000); toast('Saved!');
+    setTimeout(() => URL.revokeObjectURL(a.href), 4000); toast('Saved to your Downloads folder!');
   }, 'image/png');
 };
 function toast(t){ const el = document.getElementById('toast'); el.textContent = t; el.classList.add('on'); clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove('on'), 1600); }
