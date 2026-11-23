@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="js">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -55,6 +55,10 @@ a{color:inherit}
 
 .wrap{position:relative;z-index:1;width:min(1120px,100% - 40px);margin:0 auto}
 nav{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:22px 0}
+.navbar{position:sticky;top:0;z-index:20;padding:10px 0;margin:0 -8px}
+.navbar nav{padding:8px 8px 8px 14px;border-radius:999px;border:1px solid transparent;transition:background .3s,border-color .3s,box-shadow .3s}
+.navbar.stuck nav{background:rgba(11,13,31,.72);border-color:var(--line);box-shadow:0 10px 30px rgba(0,0,0,.35);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
+.navlinks a.on{color:#14122B;background:var(--marigold)}
 .brand{display:flex;align-items:center;gap:10px;font-family:var(--display);font-weight:800;font-size:20px;letter-spacing:-.01em;text-decoration:none}
 .brand .dot{width:30px;height:30px;border-radius:9px;background:conic-gradient(from 200deg,var(--coral),var(--marigold),var(--aqua),var(--coral));box-shadow:0 0 24px rgba(255,94,91,.5)}
 .navlinks{display:flex;gap:6px}
@@ -80,18 +84,34 @@ h1 .grad{background:linear-gradient(100deg,var(--coral) 10%,var(--marigold) 50%,
 .keyhint{font-size:14px;color:var(--muted);margin:0}
 
 /* sections */
-section{padding:40px 0}
+section{padding:40px 0;scroll-margin-top:76px}
 .sechead{display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:20px}
 h2{font-family:var(--display);font-weight:800;font-size:clamp(30px,4.5vw,48px);letter-spacing:-.03em;line-height:1;margin:0;text-wrap:balance}
 .sechead p{margin:0;color:var(--muted);font-size:15px}
 
-.doodle{display:grid;gap:6px;text-decoration:none;color:inherit;transition:transform .25s,border-color .25s}
-.card.doodle{background:linear-gradient(140deg,rgba(46,196,182,.28),rgba(142,92,247,.22))}
-.doodle:hover{transform:translateY(-3px);border-color:rgba(46,196,182,.6)}
-.doodle .dmark{font-size:34px;line-height:1}
-.soon.doodle{border-style:solid}
-.doodle .dgo{font-weight:800;color:var(--aqua)}
-.games{display:grid;grid-template-columns:1.6fr 1fr;gap:18px}
+.games{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.games .feature{min-height:430px}
+.feature.dfeat::before{background:linear-gradient(140deg,rgba(46,196,182,.5),rgba(142,92,247,.4) 55%,rgba(255,111,181,.3))}
+.dfeat:hover{border-color:rgba(46,196,182,.6)}
+.dart{position:absolute;right:16px;top:16px;width:200px;transform:rotate(5deg);filter:drop-shadow(0 12px 24px rgba(0,0,0,.35))}
+.dart .ln{fill:none;stroke-width:6;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:420;stroke-dashoffset:420;animation:draw 7s ease-in-out infinite}
+.dart .l2{animation-delay:.9s}.dart .l3{animation-delay:1.8s}
+.dart .pop{opacity:0;animation:pop 7s ease-in-out infinite;animation-delay:2.6s}
+@keyframes draw{0%{stroke-dashoffset:420}30%,85%{stroke-dashoffset:0}100%{stroke-dashoffset:0;opacity:0}}
+@keyframes pop{0%,10%{opacity:0;transform:scale(.4)}20%,80%{opacity:1;transform:none}100%{opacity:0}}
+.dart .pop{transform-box:fill-box;transform-origin:center}
+/* featured art */
+.artgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px}
+.artpiece{padding:0;border:0;background:#fff;border-radius:18px;overflow:hidden;aspect-ratio:3/4;cursor:zoom-in;box-shadow:0 12px 30px rgba(0,0,0,.35);transition:transform .25s}
+.artpiece:nth-child(odd){transform:rotate(-1.5deg)}.artpiece:nth-child(even){transform:rotate(1.5deg)}
+.artpiece:hover{transform:rotate(0) scale(1.03)}
+.artpiece img{width:100%;height:100%;object-fit:cover;display:block}
+.artview{position:fixed;inset:0;z-index:40;background:rgba(8,9,22,.94);display:grid;place-items:center;padding:20px;cursor:zoom-out}
+.artview[hidden]{display:none}
+.artview img{max-width:100%;max-height:100%;border-radius:14px;background:#fff}
+/* gentle scroll-in */
+.js .reveal{opacity:0;transform:translateY(26px);transition:opacity .7s ease,transform .7s cubic-bezier(.2,.7,.2,1)}
+.js .reveal.in{opacity:1;transform:none}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
 .feature{position:relative;overflow:hidden;padding:30px;display:grid;gap:16px;min-height:340px;align-content:end;text-decoration:none;transition:transform .25s,border-color .25s}
 .feature:hover{transform:translateY(-4px);border-color:rgba(255,182,39,.5)}
@@ -109,9 +129,6 @@ h2{font-family:var(--display);font-weight:800;font-size:clamp(30px,4.5vw,48px);l
 .soon{padding:24px;display:grid;gap:8px;border-style:dashed;align-content:center}
 .soon h3{font-family:var(--display);font-weight:700;font-size:24px;letter-spacing:-.02em;margin:0}
 .soon p{margin:0;color:var(--muted);font-size:15px}
-.howto{padding:24px;display:grid;gap:10px}
-.howto h3{font-family:var(--display);font-weight:700;font-size:20px;margin:0}
-.howto ol{margin:0;padding-left:20px;color:var(--muted);font-size:15px;display:grid;gap:6px}
 
 .familycard{margin-top:18px;padding:20px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;text-decoration:none;transition:transform .25s,border-color .25s}
 .familycard:hover{transform:translateY(-3px);border-color:rgba(46,196,182,.6)}
@@ -148,8 +165,9 @@ footer{padding:40px 0 56px;color:var(--muted);font-size:14px;display:flex;justif
   .games,.work{grid-template-columns:1fr}
   .navlinks a{padding:8px 10px}
   .hero{padding-top:28px}
-  .feature{min-height:0;padding-top:150px}
+  .games .feature{min-height:0;padding-top:170px}
   .feature .art{right:-6px;top:14px}
+  .dart{width:150px;right:12px;top:12px}
   .row{grid-template-columns:1fr;gap:4px}
 }
 @media (max-width:420px){
@@ -157,10 +175,14 @@ footer{padding:40px 0 56px;color:var(--muted);font-size:14px;display:flex;justif
   .key.space{width:120px}
   .feature .art{grid-template-columns:repeat(3,52px)}
   .feature .art span{height:52px;font-size:22px}
-  .navlinks a:not(.keep){display:none}
+  .bname{display:none}
+  .navlinks{gap:2px}
+  .navlinks a{padding:7px 10px;font-size:14px}
 }
 @media (prefers-reduced-motion:reduce){
   .glow i{animation:none}
+  .dart .ln{animation:none;stroke-dashoffset:0}.dart .pop{animation:none;opacity:1}
+  .js .reveal{opacity:1;transform:none}
   *{transition:none!important}
 }
 </style>
@@ -170,14 +192,15 @@ footer{padding:40px 0 56px;color:var(--muted);font-size:14px;display:flex;justif
 <div class="grain" aria-hidden="true"></div>
 
 <div class="wrap">
-  <nav>
-    <a class="brand" href="#top"><span class="dot" aria-hidden="true"></span>Harsh Family</a>
+  <div class="navbar" id="navbar"><nav>
+    <a class="brand" href="#top"><span class="dot" aria-hidden="true"></span><span class="bname">Harsh Family</span></a>
     <div class="navlinks">
-      <a class="keep" href="#play">Play</a>
-      <a href="#work">Work</a>
-      <a class="keep" href="https://family.nikhilharsh.com">Family 🔒</a>
+      <a href="#play" data-sec="play">Play</a>
+      <a href="#art" data-sec="art" id="navart" hidden>Art</a>
+      <a href="#work" data-sec="work">Work</a>
+      <a href="https://family.nikhilharsh.com">Family 🔒</a>
     </div>
-  </nav>
+  </nav></div>
 
   <header class="hero" id="top">
     <div class="eyebrow">Chapel Hill, NC</div>
@@ -190,56 +213,60 @@ footer{padding:40px 0 56px;color:var(--muted);font-size:14px;display:flex;justif
   </header>
 
   <section id="play">
-    <div class="sechead"><h2>Play</h2><p>Games made at home, for the kids.</p></div>
+    <div class="sechead reveal"><h2>Play</h2><p>Games made at home, for the kids.</p></div>
     <div class="games">
-      <a class="card feature" href="https://play.nikhilharsh.com">
+      <a class="card feature reveal" href="https://play.nikhilharsh.com">
         <div class="art" aria-hidden="true"><span>F</span><span class="on">J</span><span class="paw">🐾</span><span class="on">A</span><span>S</span><span>D</span></div>
         <span class="tag">Typing game</span>
         <h3>Paws &amp; Keys</h3>
-        <p>Learn to type with a pet friend. Pop bubbles, race the snail, dig for stickers, raise critters and build a block world.</p>
+        <p>Learn to type with a pet friend. Pop bubbles, race the snail, raise critters and guard a block world at night.</p>
         <span class="play">Play now <span aria-hidden="true">→</span></span>
       </a>
-      <div class="side">
-        <div class="card howto">
-          <h3>Playing on a new computer?</h3>
-          <ol>
-            <li>Open Paws &amp; Keys from this page.</li>
-            <li>Pick your player. Your stars, coins and pets are already there.</li>
-          </ol>
-        </div>
-        <a class="card soon doodle" href="/draw/">
-          <span class="dmark" aria-hidden="true">🎨</span>
-          <h3>Doodle Studio</h3>
-          <p>Draw, fill, add stickers and words, then save it to Photos.</p>
-          <span class="dgo">Start drawing <span aria-hidden="true">→</span></span>
-        </a>
-      </div>
+      <a class="card feature dfeat reveal" href="/draw/">
+        <svg class="dart" viewBox="0 0 220 170" aria-hidden="true">
+          <rect x="6" y="6" width="208" height="158" rx="18" fill="rgba(255,255,255,.92)"/>
+          <path class="ln l1" d="M40 120 C60 60 90 60 100 95 S140 140 170 70" stroke="#FF5E5B"/>
+          <path class="ln l2" d="M150 120 L158 102 L176 100 L162 88 L166 70 L150 80 L134 70 L138 88 L124 100 L142 102 Z" stroke="#8E5CF7"/>
+          <path class="ln l3" d="M52 58 c0-10 14-14 18-4 c4-10 18-6 18 4 c0 12-18 22-18 22 s-18-10-18-22z" stroke="#2EC4B6"/>
+          <text x="176" y="52" font-size="26" class="pop">⭐</text>
+        </svg>
+        <span class="tag">Drawing</span>
+        <h3>Doodle Studio</h3>
+        <p>Draw, fill, make comics, add stickers and words, then save it or post it to the family wall.</p>
+        <span class="play">Start drawing <span aria-hidden="true">→</span></span>
+      </a>
     </div>
   </section>
 
+  <section id="art" hidden>
+    <div class="sechead reveal"><h2>From the art wall</h2><p>Made in Doodle Studio.</p></div>
+    <div class="artgrid reveal" id="artgrid"></div>
+  </section>
+  <div class="artview" id="artview" hidden><img id="artbig" alt="A drawing from the family art wall"></div>
+
   <section id="family" style="padding-top:0">
-    <a class="card familycard" href="https://family.nikhilharsh.com">
+    <a class="card familycard reveal" href="https://family.nikhilharsh.com">
       <div class="ft"><div class="lock" aria-hidden="true">🔒</div><div><b>Family area</b><span class="sub">For family members only. Sign in with Google.</span></div></div>
       <span class="go">Open <span aria-hidden="true">→</span></span>
     </a>
   </section>
 
   <section id="work">
-    <div class="sechead"><h2>Nikhil at work</h2><p>The short version.</p></div>
+    <div class="sechead reveal"><h2>Nikhil at work</h2><p>The short version.</p></div>
     <div class="work">
-      <div class="card intro">
+      <div class="card intro reveal">
         <p><strong>Nikhil Harsh</strong> is President of BigScoots and a revenue leader who has run sales, customer success and revenue operations at growing software and cybersecurity companies.</p>
         <p>He has seen companies through venture, private equity and IPO stages, and lives in Chapel Hill with his family.</p>
         <a class="li" id="linkedin" href="#" hidden>Connect on LinkedIn <span aria-hidden="true">↗</span></a>
       </div>
-      <div class="card timeline">
+      <div class="card timeline reveal">
         <div class="row"><div class="when">Now</div><div><b>President, BigScoots</b></div></div>
         <div class="row"><div class="when">Before</div><div><b>Revenue leadership</b></div></div>
         <div class="row"><div class="when">Datto</div><div><b>Scaled through VC, PE and IPO</b></div></div>
         <div class="row"><div class="when">Early</div><div><b>Inverness Graham</b></div></div>
       </div>
     </div>
-    <div class="companies" aria-label="Companies">
+    <div class="companies reveal" aria-label="Companies">
       <div class="co" data-logo="https://www.bigscoots.com/wp-content/uploads/2022/10/bigscoots-logo-white.svg"><b>BigScoots</b></div>
       <div class="co" data-logo="assets/logos/datto.png"><b>Datto</b></div>
       <div class="co" data-logo="https://www.invernessgraham.com/wp-content/uploads/logo-white.svg"><b>Inverness Graham</b></div>
@@ -280,6 +307,30 @@ footer{padding:40px 0 56px;color:var(--muted);font-size:14px;display:flex;justif
     if(keys[k]){ if(k === ' ') e.preventDefault(); light(k); }
   });
   Object.keys(keys).forEach(function(k){ keys[k].addEventListener('pointerdown', function(){ light(k); }); });
+  // sticky bar: solid once scrolled; the current section's pill lights up
+  var bar = document.getElementById('navbar');
+  function onScroll(){ bar.classList.toggle('stuck', window.scrollY > 40); }
+  window.addEventListener('scroll', onScroll, {passive:true}); onScroll();
+  var pills = {}; document.querySelectorAll('.navlinks a[data-sec]').forEach(function(a){ pills[a.dataset.sec] = a; });
+  if('IntersectionObserver' in window){
+    var spy = new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting){ Object.keys(pills).forEach(function(k){ pills[k].classList.toggle('on', k === e.target.id); }); } }); }, {rootMargin:'-45% 0px -50% 0px'});
+    ['play','art','work'].forEach(function(id){ var el = document.getElementById(id); if(el) spy.observe(el); });
+    // gentle scroll-in
+    var rv = new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); rv.unobserve(e.target); } }); }, {rootMargin:'0px 0px -8% 0px'});
+    document.querySelectorAll('.reveal').forEach(function(el){ rv.observe(el); });
+  } else document.querySelectorAll('.reveal').forEach(function(el){ el.classList.add('in'); });
+  // featured art from the family art wall (pictures only)
+  fetch('/api/featured').then(function(r){ return r.json(); }).then(function(d){
+    if(!d.ok || !d.art.length) return;
+    var g = document.getElementById('artgrid');
+    g.innerHTML = d.art.map(function(a){ return '<button class="artpiece" data-id="' + a.id + '" aria-label="View drawing"><img loading="lazy" src="/featured/' + a.id + '.jpg" alt="A drawing from the family art wall"></button>'; }).join('');
+    document.getElementById('art').hidden = false; document.getElementById('navart').hidden = false;
+    var v = document.getElementById('artview'), big = document.getElementById('artbig');
+    g.onclick = function(e){ var b = e.target.closest('.artpiece'); if(!b) return; big.src = '/featured/' + b.dataset.id + '.jpg'; v.hidden = false; };
+    v.onclick = function(){ v.hidden = true; };
+    document.addEventListener('keydown', function(e){ if(e.key === 'Escape') v.hidden = true; });
+    if(window.IntersectionObserver){ var sec = document.getElementById('art'); spy.observe(sec); document.querySelectorAll('#art .reveal').forEach(function(el){ rv.observe(el); }); }
+  }).catch(function(){});
   // one small welcome: the keys light in order once on load
   if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches){
     ['h','o','m','e'].forEach(function(k, i){ setTimeout(function(){ light(k); }, 500 + i*180); });
