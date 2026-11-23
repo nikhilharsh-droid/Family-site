@@ -85,6 +85,12 @@ section{padding:40px 0}
 h2{font-family:var(--display);font-weight:800;font-size:clamp(30px,4.5vw,48px);letter-spacing:-.03em;line-height:1;margin:0;text-wrap:balance}
 .sechead p{margin:0;color:var(--muted);font-size:15px}
 
+.doodle{display:grid;gap:6px;text-decoration:none;color:inherit;transition:transform .25s,border-color .25s}
+.card.doodle{background:linear-gradient(140deg,rgba(46,196,182,.28),rgba(142,92,247,.22))}
+.doodle:hover{transform:translateY(-3px);border-color:rgba(46,196,182,.6)}
+.doodle .dmark{font-size:34px;line-height:1}
+.soon.doodle{border-style:solid}
+.doodle .dgo{font-weight:800;color:var(--aqua)}
 .games{display:grid;grid-template-columns:1.6fr 1fr;gap:18px}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
 .feature{position:relative;overflow:hidden;padding:30px;display:grid;gap:16px;min-height:340px;align-content:end;text-decoration:none;transition:transform .25s,border-color .25s}
@@ -201,10 +207,12 @@ footer{padding:40px 0 56px;color:var(--muted);font-size:14px;display:flex;justif
             <li>Pick your player. Your stars, coins and pets are already there.</li>
           </ol>
         </div>
-        <div class="card soon">
-          <h3>Next game: coming soon</h3>
-          <p>Ideas welcome. Ask at dinner.</p>
-        </div>
+        <a class="card soon doodle" href="/draw/">
+          <span class="dmark" aria-hidden="true">🎨</span>
+          <h3>Doodle Studio</h3>
+          <p>Draw, fill, add stickers and words, then save it to Photos.</p>
+          <span class="dgo">Start drawing <span aria-hidden="true">→</span></span>
+        </a>
       </div>
     </div>
   </section>
