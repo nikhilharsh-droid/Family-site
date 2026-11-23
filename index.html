@@ -313,7 +313,7 @@ footer{padding:40px 0 56px;color:var(--muted);font-size:14px;display:flex;justif
   // Company logos: data-logo points at each company's official logo file (on its own site, or in assets/logos/).
   // If the file loads it replaces the name; if not, the name stays.
   document.querySelectorAll('.co[data-logo]').forEach(function(el){
-    var img = new Image(); img.alt = el.querySelector('b').textContent; img.decoding = 'async'; img.loading = 'lazy'; img.referrerPolicy = 'no-referrer';
+    var img = new Image(); img.alt = el.querySelector('b').textContent; img.decoding = 'async';
     img.onload = function(){ el.replaceChild(img, el.querySelector('b')); };
     img.src = el.dataset.logo;
   });
