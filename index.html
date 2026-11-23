@@ -118,6 +118,12 @@ h2{font-family:var(--display);font-weight:800;font-size:clamp(30px,4.5vw,48px);l
 .games .feature{min-height:430px}
 .feature.dfeat::before{background:linear-gradient(140deg,rgba(46,196,182,.5),rgba(142,92,247,.4) 55%,rgba(255,111,181,.3))}
 .dfeat:hover{border-color:rgba(46,196,182,.6)}
+.feature.cfeat{grid-column:1/-1;min-height:320px}
+.feature.cfeat::before{background:linear-gradient(140deg,rgba(142,92,247,.55),rgba(46,196,182,.35) 50%,rgba(255,182,39,.3))}
+.cfeat:hover{border-color:rgba(142,92,247,.6)}
+.cart{position:absolute;right:22px;top:22px;width:230px;transform:rotate(-6deg);filter:drop-shadow(0 12px 24px rgba(0,0,0,.35))}
+.cart .hop{animation:knight 4s ease-in-out infinite}
+@keyframes knight{0%,15%{transform:translate(0,0)}30%{transform:translate(25px,-75px)}42%,62%{transform:translate(50px,-100px)}75%{transform:translate(25px,-75px)}88%,100%{transform:translate(0,0)}}
 .dart{position:absolute;right:16px;top:16px;width:200px;transform:rotate(5deg);filter:drop-shadow(0 12px 24px rgba(0,0,0,.35))}
 .dart .ln{fill:none;stroke-width:6;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:420;stroke-dashoffset:420;animation:draw 7s ease-in-out infinite}
 .dart .l2{animation-delay:.9s}.dart .l3{animation-delay:1.8s}
@@ -205,6 +211,8 @@ footer{padding:40px 0 56px;color:var(--muted);font-size:14px;display:flex;justif
   .games .feature{min-height:0;padding-top:170px}
   .feature .art{right:-6px;top:14px}
   .dart{width:150px;right:12px;top:12px}
+  .cart{width:150px;right:12px;top:14px}
+  .feature.cfeat{min-height:0}
   .row{grid-template-columns:1fr;gap:4px}
 }
 @media (max-width:420px){
@@ -219,7 +227,7 @@ footer{padding:40px 0 56px;color:var(--muted);font-size:14px;display:flex;justif
 @media (prefers-reduced-motion:reduce){
   .glow i{animation:none}
   .stars i{animation:none}
-  .dart .ln{animation:none;stroke-dashoffset:0}.dart .pop{animation:none;opacity:1}
+  .dart .ln{animation:none;stroke-dashoffset:0}.cart .hop{animation:none}.dart .pop{animation:none;opacity:1}
   .js .reveal{opacity:1;translate:none}
   .h1w{animation:none!important;opacity:1!important}
   .keys .key{animation:none!important}
@@ -282,6 +290,18 @@ footer{padding:40px 0 56px;color:var(--muted);font-size:14px;display:flex;justif
         <h3>Doodle Studio</h3>
         <p>Draw, fill, make comics, add stickers and words, then save it or post it to the family wall.</p>
         <span class="play">Start drawing <span aria-hidden="true">→</span></span>
+      </a>
+      <a class="card feature cfeat reveal" href="/chess/">
+        <svg class="cart" viewBox="0 0 220 220" aria-hidden="true">
+          <rect x="4" y="4" width="212" height="212" rx="20" fill="#fff"/>
+          <g><rect x="10" y="10" width="50" height="50" fill="#FFF1D9"/><rect x="60" y="10" width="50" height="50" fill="#7CCBB6"/><rect x="110" y="10" width="50" height="50" fill="#FFF1D9"/><rect x="160" y="10" width="50" height="50" fill="#7CCBB6"/><rect x="10" y="60" width="50" height="50" fill="#7CCBB6"/><rect x="60" y="60" width="50" height="50" fill="#FFF1D9"/><rect x="110" y="60" width="50" height="50" fill="#7CCBB6"/><rect x="160" y="60" width="50" height="50" fill="#FFF1D9"/><rect x="10" y="110" width="50" height="50" fill="#FFF1D9"/><rect x="60" y="110" width="50" height="50" fill="#7CCBB6"/><rect x="110" y="110" width="50" height="50" fill="#FFF1D9"/><rect x="160" y="110" width="50" height="50" fill="#7CCBB6"/><rect x="10" y="160" width="50" height="50" fill="#7CCBB6"/><rect x="60" y="160" width="50" height="50" fill="#FFF1D9"/><rect x="110" y="160" width="50" height="50" fill="#7CCBB6"/><rect x="160" y="160" width="50" height="50" fill="#FFF1D9"/></g>
+          <g transform="translate(160 160) scale(.5)"><g fill="#40366A" stroke="#19132E" stroke-width="4" stroke-linejoin="round"><path d="M30 77L33 41H67L70 77Z"/><path d="M26 42V18H36V26H45V18H55V26H64V18H74V42Z"/><rect x="22" y="75" width="56" height="13" rx="6.5"/></g><g fill="#fff"><circle cx="43" cy="55" r="3"/><circle cx="57" cy="55" r="3"/></g></g>
+          <g class="hop"><g transform="translate(10 110) scale(.5)"><g fill="#fff" stroke="#2B2340" stroke-width="4" stroke-linejoin="round"><path d="M30 77C29 63 35 55 43 49C37 51 29 51 25 45C22 39 28 30 37 26L41 15L48 23C65 23 75 38 73 56L71 77Z"/><rect x="22" y="75" width="56" height="13" rx="6.5"/></g><circle cx="47" cy="33" r="3" fill="#2B2340"/></g></g>
+        </svg>
+        <span class="tag">Chess</span>
+        <h3>Chess Club</h3>
+        <p>Play chess with a friend on one screen, or solve puzzles: checkmates, forks and free pieces. Easy, medium or tricky.</p>
+        <span class="play">Let's play <span aria-hidden="true">→</span></span>
       </a>
     </div>
   </section>
