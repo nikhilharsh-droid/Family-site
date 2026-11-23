@@ -38,19 +38,28 @@
 }
 *{box-sizing:border-box}
 html,body{margin:0}
-body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.55;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+body{background:var(--sky,var(--bg));transition:background 3s ease;color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.55;overflow-x:hidden;-webkit-font-smoothing:antialiased}
 a{color:inherit}
 :focus-visible{outline:3px solid var(--marigold);outline-offset:3px;border-radius:8px}
 
 /* ambient glow */
 .glow{position:fixed;inset:-20vmax;z-index:0;pointer-events:none;filter:blur(70px);opacity:.55}
 .glow i{position:absolute;width:48vmax;height:48vmax;border-radius:50%}
-.glow i:nth-child(1){background:var(--coral);left:8%;top:2%;animation:drift1 22s ease-in-out infinite alternate}
-.glow i:nth-child(2){background:var(--marigold);right:6%;top:18%;width:38vmax;height:38vmax;opacity:.8;animation:drift2 26s ease-in-out infinite alternate}
-.glow i:nth-child(3){background:var(--aqua);left:30%;bottom:-4%;width:44vmax;height:44vmax;opacity:.7;animation:drift3 30s ease-in-out infinite alternate}
+.glow i{transition:background 3s ease}
+.glow i:nth-child(1){background:var(--g1,var(--coral));left:8%;top:2%;animation:drift1 22s ease-in-out infinite alternate}
+.glow i:nth-child(2){background:var(--g2,var(--marigold));right:6%;top:18%;width:38vmax;height:38vmax;opacity:.8;animation:drift2 26s ease-in-out infinite alternate}
+.glow i:nth-child(3){background:var(--g3,var(--aqua));left:30%;bottom:-4%;width:44vmax;height:44vmax;opacity:.7;animation:drift3 30s ease-in-out infinite alternate}
 @keyframes drift1{to{transform:translate(12vmax,8vmax) scale(1.1)}}
 @keyframes drift2{to{transform:translate(-10vmax,12vmax) scale(.9)}}
 @keyframes drift3{to{transform:translate(8vmax,-10vmax) scale(1.15)}}
+.stars{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:var(--stars,0);transition:opacity 3s ease}
+.stars i{position:absolute;width:2px;height:2px;border-radius:50%;background:#fff;box-shadow:0 0 6px rgba(255,255,255,.8);animation:twinkle 4s ease-in-out infinite alternate}
+@keyframes twinkle{from{opacity:.25}to{opacity:1}}
+.orb{position:fixed;z-index:0;pointer-events:none;width:84px;height:84px;margin:-42px 0 0 -42px;transition:left 2s ease,top 2s ease,opacity 2s ease;opacity:0}
+.orb.sun{border-radius:50%;background:radial-gradient(circle,#FFF6D6 0 38%,#FFD166 52%,rgba(255,182,39,0) 72%);filter:drop-shadow(0 0 40px rgba(255,200,90,.7))}
+.orb.moon svg{width:100%;height:100%;filter:drop-shadow(0 0 18px rgba(220,230,255,.55))}
+.skyline{color:var(--muted);font-weight:500;letter-spacing:.08em}
+@media (max-width:520px){.orb{width:56px;height:56px;margin:-28px 0 0 -28px}}
 .grain{position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse at top,transparent 30%,rgba(11,13,31,.65) 80%)}
 
 .wrap{position:relative;z-index:1;width:min(1120px,100% - 40px);margin:0 auto}
@@ -181,6 +190,7 @@ footer{padding:40px 0 56px;color:var(--muted);font-size:14px;display:flex;justif
 }
 @media (prefers-reduced-motion:reduce){
   .glow i{animation:none}
+  .stars i{animation:none}
   .dart .ln{animation:none;stroke-dashoffset:0}.dart .pop{animation:none;opacity:1}
   .js .reveal{opacity:1;transform:none}
   *{transition:none!important}
@@ -189,6 +199,8 @@ footer{padding:40px 0 56px;color:var(--muted);font-size:14px;display:flex;justif
 </head>
 <body>
 <div class="glow" aria-hidden="true"><i></i><i></i><i></i></div>
+<div class="stars" id="stars" aria-hidden="true"></div>
+<div class="orb" id="orb" aria-hidden="true"></div>
 <div class="grain" aria-hidden="true"></div>
 
 <div class="wrap">
@@ -203,7 +215,7 @@ footer{padding:40px 0 56px;color:var(--muted);font-size:14px;display:flex;justif
   </nav></div>
 
   <header class="hero" id="top">
-    <div class="eyebrow">Chapel Hill, NC</div>
+    <div class="eyebrow">Chapel Hill, NC<span class="skyline" id="skyline"></span></div>
     <h1>Home base for the <span class="grad">Harsh family.</span></h1>
     <p class="lede">The games we make, the things we're into, and where to find Nikhil at work.</p>
     <div class="keys" id="keys" aria-label="Keyboard toy: type H, O, M or E">
@@ -331,6 +343,55 @@ footer{padding:40px 0 56px;color:var(--muted);font-size:14px;display:flex;justif
     document.addEventListener('keydown', function(e){ if(e.key === 'Escape') v.hidden = true; });
     if(window.IntersectionObserver){ var sec = document.getElementById('art'); spy.observe(sec); document.querySelectorAll('#art .reveal').forEach(function(el){ rv.observe(el); }); }
   }).catch(function(){});
+  // real sky: colors, stars, sun and moon follow the actual time in Chapel Hill (add ?sky=dawn|day|golden|dusk|night to preview)
+  (function(){
+    var LAT = 35.913, LNG = -79.056, rad = Math.PI/180, dayMs = 864e5, J1970 = 2440588, J2000 = 2451545, e = rad*23.4397, J0 = 0.0009;
+    function toDays(d){ return d/dayMs - 0.5 + J1970 - J2000; }
+    function fromJulian(j){ return new Date((j + 0.5 - J1970)*dayMs); }
+    function sunTimes(date){
+      var lw = rad*-LNG, phi = rad*LAT, d = toDays(date), n = Math.round(d - J0 - lw/(2*Math.PI));
+      var ds = J0 + lw/(2*Math.PI) + n, M = rad*(357.5291 + 0.98560028*ds);
+      var L = M + rad*(1.9148*Math.sin(M) + 0.02*Math.sin(2*M) + 0.0003*Math.sin(3*M)) + rad*102.9372 + Math.PI;
+      var dec = Math.asin(Math.sin(e)*Math.sin(L)), noon = J2000 + ds + 0.0053*Math.sin(M) - 0.0069*Math.sin(2*L);
+      var w = Math.acos((Math.sin(-0.833*rad) - Math.sin(phi)*Math.sin(dec))/(Math.cos(phi)*Math.cos(dec)));
+      var a = J0 + (w + lw)/(2*Math.PI) + n, set = J2000 + a + 0.0053*Math.sin(M) - 0.0069*Math.sin(2*L);
+      return {rise: fromJulian(noon - (set - noon)), set: fromJulian(set)};
+    }
+    var SKIES = {
+      night: {sky:'#070A1C', g1:'#3B3FB5', g2:'#1C5F86', g3:'#5E3A9A', stars:1, name:'Night sky'},
+      dawn:  {sky:'#170F2C', g1:'#FF7A8A', g2:'#FFB36B', g3:'#7A5CF0', stars:.25, name:'Sunrise'},
+      day:   {sky:'#0C1634', g1:'#3FA9F5', g2:'#FFD166', g3:'#2EC4B6', stars:0, name:'Daytime'},
+      golden:{sky:'#140F26', g1:'#FF8C42', g2:'#FFC15E', g3:'#FF5E5B', stars:0, name:'Golden hour'},
+      dusk:  {sky:'#110D28', g1:'#C04D8E', g2:'#FF7E5F', g3:'#5B3FB0', stars:.6, name:'Sunset'}
+    };
+    var stars = document.getElementById('stars'), orb = document.getElementById('orb'), line = document.getElementById('skyline');
+    for(var i = 0; i < 90; i++){ var st = document.createElement('i'); var sz = Math.random() < .15 ? 3 : 2; st.style.cssText = 'left:' + (Math.random()*100) + '%;top:' + (Math.random()*70) + '%;width:' + sz + 'px;height:' + sz + 'px;animation-delay:' + (-Math.random()*4) + 's;animation-duration:' + (3 + Math.random()*4) + 's'; stars.appendChild(st); }
+    function moonSVG(){
+      var p = ((Date.now() - Date.UTC(2000, 0, 6, 18, 14))/dayMs/29.530589) % 1; if(p < 0) p += 1;
+      var rx = Math.abs(Math.cos(2*Math.PI*p)).toFixed(3), wax = p < .5, d;
+      if(wax) d = 'M0 -1 A1 1 0 0 1 0 1 A' + rx + ' 1 0 0 ' + (p < .25 ? 0 : 1) + ' 0 -1Z';
+      else d = 'M0 -1 A1 1 0 0 0 0 1 A' + rx + ' 1 0 0 ' + (p > .75 ? 1 : 0) + ' 0 -1Z';
+      return '<svg viewBox="-1.1 -1.1 2.2 2.2"><circle r="1" fill="rgba(200,210,240,.16)"/><path d="' + d + '" fill="#EEF1FF"/></svg>';
+    }
+    function update(){
+      var now = new Date(), forced = (location.search.match(/[?&]sky=(\w+)/) || [])[1];
+      var t = sunTimes(now), R = t.rise.getTime(), S = t.set.getTime(), n = now.getTime(), m = 60000, phase;
+      if(n < R - 50*m) phase = 'night'; else if(n < R + 40*m) phase = 'dawn'; else if(n < S - 80*m) phase = 'day';
+      else if(n < S - 15*m) phase = 'golden'; else if(n < S + 50*m) phase = 'dusk'; else phase = 'night';
+      if(forced && SKIES[forced]){ phase = forced; n = {night:S + 4*3600e3, dawn:R, day:(R + S)/2, golden:S - 50*m, dusk:S}[forced]; }
+      var c = SKIES[phase], root = document.documentElement.style;
+      root.setProperty('--sky', c.sky); root.setProperty('--g1', c.g1); root.setProperty('--g2', c.g2); root.setProperty('--g3', c.g3); root.setProperty('--stars', c.stars);
+      // sun crosses the sky from sunrise to sunset; the moon crosses it overnight
+      var isDay = n >= R && n <= S, f;
+      if(isDay) f = (n - R)/(S - R); else { var s0 = n > S ? S : S - dayMs, r1 = n > S ? R + dayMs : R; f = (n - s0)/(r1 - s0); }
+      f = Math.max(0, Math.min(1, f));
+      orb.className = 'orb ' + (isDay ? 'sun' : 'moon'); orb.innerHTML = isDay ? '' : moonSVG();
+      orb.style.left = (8 + 84*f) + 'vw'; orb.style.top = (34 - 24*Math.sin(Math.PI*f)) + 'vh'; orb.style.opacity = ((f < .03 || f > .97) ? .35 : .9) * (window.innerWidth < 600 ? .6 : 1);
+      var time = now.toLocaleTimeString('en-US', {hour:'numeric', minute:'2-digit', timeZone:'America/New_York'});
+      line.textContent = ' · ' + time + ' · ' + c.name;
+    }
+    update(); setInterval(update, 60000);
+  })();
   // one small welcome: the keys light in order once on load
   if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches){
     ['h','o','m','e'].forEach(function(k, i){ setTimeout(function(){ light(k); }, 500 + i*180); });
