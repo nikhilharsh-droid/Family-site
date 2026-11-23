@@ -19,6 +19,8 @@ header h1{margin:0 auto 0 4px;font-size:clamp(17px,5vw,22px);white-space:nowrap;
 header h1 span{color:#FF5E5B}
 .btn{white-space:nowrap;font:inherit;font-weight:800;font-size:15px;border:0;border-radius:14px;padding:10px 14px;background:#fff;color:#2B2340;box-shadow:0 2px 0 rgba(43,35,64,.15);cursor:pointer}
 .btn:active{transform:translateY(2px);box-shadow:none}
+.btn.hub{text-decoration:none;padding:9px 12px;font-size:15px}
+@media (max-width:480px){.btn.hub span,#undo span{display:none}header{gap:6px;padding:10px 8px}header .btn{padding:9px 11px}header h1{font-size:17px}}
 .btn.save{background:#2EC4B6;color:#fff}
 .stage{position:relative;margin:0 12px;border-radius:22px;background:#fff;box-shadow:0 6px 24px rgba(43,35,64,.12);overflow:hidden;touch-action:none}
 canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none}
@@ -50,8 +52,9 @@ footer{padding:10px 12px 12px;display:grid;gap:10px}
 <body>
 <div class="app">
   <header>
+    <a class="btn hub" href="https://nikhilharsh.com" aria-label="Back to the family hub">🏡<span> Family hub</span></a>
     <h1>Doodle <span>Studio</span></h1>
-    <button class="btn" id="undo" aria-label="Undo">↩︎ Undo</button>
+    <button class="btn" id="undo" aria-label="Undo">↩︎<span> Undo</span></button>
     <button class="btn" id="clear">New</button>
     <button class="btn save" id="save">Save</button>
   </header>
