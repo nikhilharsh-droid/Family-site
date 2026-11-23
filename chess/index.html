@@ -218,7 +218,7 @@ h3{margin:0 0 8px;font-size:15px;font-weight:900;color:var(--muted);text-transfo
 <div class="modal hidden" id="setupModal"><div class="sheet wide">
   <div id="stepNames" style="display:grid;gap:12px">
     <h2>Who's playing?</h2>
-    <p>Tap two players. Player 1 calls the coin.</p>
+    <p>Tap two players. You take turns calling the coin.</p>
     <div class="pick" id="pickNames"></div>
     <div class="addrow"><input id="newName" maxlength="14" placeholder="Add a new name" autocomplete="off"><button class="btn" id="addName">➕ Add</button></div>
     <div class="row"><button class="btn" id="setupCancel">Cancel</button><button class="btn" id="quick">Skip names</button><button class="btn sun" id="toCoin" disabled>🪙 Flip a coin</button></div>
@@ -537,12 +537,45 @@ function material(st, color){ var s = 0; st.board.forEach(function(p){ if (p && 
 function esc(s){ return String(s).replace(/[&<>"']/g, function(c){ return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]; }); }
 var roster = load('players', { list: [], st: {} });
 function rec(name){ if (!roster.st[name]) roster.st[name] = { w:0, l:0, d:0, pz:0, streak:0, best:0 }; return roster.st[name]; }
+if (!roster.calls) roster.calls = {};
+/* server sync: every change is queued as a small event and sent to /api/chess; the server copy wins on load.
+   If the server can't be reached, everything keeps working on this device and the queue is sent later. */
+var syncQ = load('syncq', []), flushing = null;
+function push(ev){ ev.at = Date.now(); syncQ.push(ev); save('syncq', syncQ); flush(); }
+function flush(){
+  if (flushing) return flushing;
+  if (!syncQ.length) return Promise.resolve();
+  var batch = syncQ.slice(0, 50);
+  flushing = fetch('/api/chess/events', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ events: batch }) })
+    .then(function(r){ if (!r.ok) throw new Error(r.status); syncQ = syncQ.slice(batch.length); save('syncq', syncQ); flushing = null; return flush(); })
+    .catch(function(){ flushing = null; });
+  return flushing;
+}
+function pull(){
+  return fetch('/api/chess/state', { credentials: 'same-origin', cache: 'no-store' })
+    .then(function(r){ if (!r.ok) throw new Error(r.status); return r.json(); })
+    .then(function(d){
+      if (syncQ.length || !d || !d.players) return;
+      roster.list = d.players.map(function(p){ return p.name; }); roster.st = {};
+      d.players.forEach(function(p){ roster.st[p.name] = { w: p.w, l: p.l, d: p.d, pz: p.pz, streak: p.streak, best: p.best }; });
+      roster.calls = d.calls || {}; roster.seeded = true; save('players', roster);
+      solverChips(); chips();
+    }).catch(function(){});
+}
+function startSync(){
+  // first time this device talks to the server, send what it already has so nothing is lost
+  if (!roster.seeded && roster.list.length){
+    push({ t: 'seed', players: roster.list.map(function(n){ var r = rec(n); return { name: n, w: r.w, l: r.l, d: r.d, pz: r.pz, streak: r.streak, best: r.best }; }) });
+  }
+  flush().then(function(){ if (!syncQ.length) roster.seeded = true, save('players', roster); return pull(); });
+}
+function pairKey(a, b){ return [a.toLowerCase(), b.toLowerCase()].sort().join('|'); }
 function addPlayer(name){
   name = name.trim().replace(/\s+/g, ' ').slice(0, 14);
   if (!name) return '';
   var hit = roster.list.filter(function(n){ return n.toLowerCase() === name.toLowerCase(); })[0];
   if (hit) return hit;
-  roster.list.push(name); rec(name); save('players', roster); return name;
+  roster.list.push(name); rec(name); save('players', roster); push({ t: 'add', name: name }); return name;
 }
 function showStats(){
   var names = roster.list.slice().sort(function(a, b){ return a.localeCompare(b); });
@@ -556,7 +589,7 @@ $('statsBody').onclick = function(e){
   var b = e.target.closest('[data-del]'); if (!b) return;
   var n = b.dataset.del;
   if (!confirm('Remove ' + n + ' and their stats?')) return;
-  roster.list = roster.list.filter(function(x){ return x !== n; }); delete roster.st[n]; save('players', roster);
+  roster.list = roster.list.filter(function(x){ return x !== n; }); delete roster.st[n]; save('players', roster); push({ t: 'del', name: n });
   if (pz.who === n){ pz.who = ''; save('pz', pz); }
   showStats(); solverChips();
 };
@@ -579,8 +612,8 @@ function syncRecord(){
   if (game.white && game.black){
     var W = rec(game.white), B = rec(game.black);
     var apply = function(r, k){ if (r === 'w'){ W.w += k; B.l += k; } else if (r === 'b'){ B.w += k; W.l += k; } else if (r === 'd'){ W.d += k; B.d += k; } };
-    if (game.rec) apply(game.rec, -1);
-    if (want) apply(want, 1);
+    if (game.rec){ apply(game.rec, -1); push({ t: 'game', white: game.white, black: game.black, r: game.rec, k: -1 }); }
+    if (want){ apply(want, 1); push({ t: 'game', white: game.white, black: game.black, r: want, k: 1 }); }
     save('players', roster);
   }
   game.rec = want; saveGame();
@@ -688,7 +721,10 @@ $('newName').onkeydown = function(e){ if (e.key === 'Enter') addFromInput(); };
 $('setupCancel').onclick = function(){ $('setupModal').classList.add('hidden'); };
 $('quick').onclick = function(){ $('setupModal').classList.add('hidden'); newGame('', ''); playOrient = 'w'; showPlay(false); };
 $('toCoin').onclick = function(){
-  var p1 = picked[0], p2 = picked[1];
+  var p1 = picked[0], p2 = picked[1], key = pairKey(p1, p2), lastCaller = roster.calls[key];
+  // take turns calling the coin: whoever didn't call last time calls now
+  if (lastCaller && lastCaller.toLowerCase() === p1.toLowerCase()){ var tmp = p1; p1 = p2; p2 = tmp; }
+  roster.calls[key] = p1; save('players', roster); push({ t: 'call', pair: key, name: p1 });
   $('stepNames').classList.add('hidden'); $('stepCoin').classList.remove('hidden');
   var coin = $('coin'); coin.style.transition = 'none'; coin.style.transform = 'rotateY(0deg)'; coin.classList.remove('toss');
   $('coinTitle').innerHTML = esc(p1) + ', call it!';
@@ -757,6 +793,7 @@ if (!pz.g) pz.g = { pz: pz.solved || 0, streak: pz.streak || 0, best: pz.best ||
 if (!pz.seen) pz.seen = [];
 function ps(){ return (pz.who && roster.st[pz.who]) ? roster.st[pz.who] : pz.g; }
 function saveStats(){ save('pz', pz); save('players', roster); }
+function resetStreak(){ var r = ps(); if (!r.streak) return; r.streak = 0; saveStats(); chips(); if (pz.who && roster.st[pz.who]) push({ t: 'miss', name: pz.who }); }
 function solverChips(){
   if (pz.who && roster.list.indexOf(pz.who) < 0) pz.who = '';
   $('solvers').innerHTML = roster.list.concat(['']).map(function(n){
@@ -899,7 +936,7 @@ function onPuzzleMove(m){
     view.st = after; view.last = m; view.flash = { sq: m.to, cls: 'bad' }; view.interactive = false; render();
     boardEl.classList.remove('shake'); void boardEl.offsetWidth; boardEl.classList.add('shake');
     say(['Not quite. Try again!', 'Hmm, look again!', 'Close! Try another move.'][cur.mistakes % 3], cur.mistakes >= 2 ? 'Tap 💡 Hint if you\'re stuck.' : 'Look for checks, captures and threats.', true);
-    if (ps().streak){ ps().streak = 0; saveStats(); chips(); }
+    resetStreak();
     setTimeout(function(){ view.st = cur.st; view.last = null; view.flash = null; view.interactive = true; render(); }, 800);
     return;
   }
@@ -930,6 +967,7 @@ function solved(){
   var r = ps(); r.pz++;
   if (clean){ r.streak++; r.best = Math.max(r.best, r.streak); }
   saveStats(); chips();
+  if (pz.who && roster.st[pz.who]) push({ t: 'puz', name: pz.who, clean: clean });
   var cheers = ['Brilliant! 🌟', 'You got it! 🎉', 'Amazing! 🏆', 'Super smart! 🧠', 'Chess star! ⭐'];
   say(cheers[Math.floor(Math.random() * cheers.length)], clean ? (r.streak > 1 ? r.streak + ' in a row!' : 'Solved with no mistakes.') : 'Solved! Try the next one with no hints.', true);
   sfx.win(); if (clean) confetti();
@@ -946,12 +984,12 @@ $('hint').onclick = function(){
   if (from < 0) return;
   cur.helped = true; view.hint = from; clearSel(); render();
   say('Try moving this piece! 💡', 'It\'s glowing purple.');
-  if (ps().streak){ ps().streak = 0; saveStats(); chips(); }
+  resetStreak();
 };
 $('show').onclick = function(){
   if (!cur || cur.done) return;
   cur.helped = true; view.interactive = false; view.hint = -1; clearSel();
-  if (ps().streak){ ps().streak = 0; saveStats(); chips(); }
+  resetStreak();
   say('Here\'s how it goes 👀', 'Watch closely!');
   (function step(){
     if (isMate(cur.st) || (!cur.p.mate && cur.ply >= cur.p.solution.length)){
@@ -1009,6 +1047,8 @@ $('looks').onclick = function(e){
   render(); if (mode === 'play') showPlay(false); else if (cur) puzzleBars();
 };
 applyLook(load('look', 'classic'));
+
+startSync();
 
 var saved = load('game', null);
 game = saved && saved.start ? { start: saved.start, ucis: saved.ucis || [], white: saved.white || '', black: saved.black || '', rec: saved.rec === undefined ? null : saved.rec } : { start: C.START, ucis: [], white: '', black: '', rec: null };
