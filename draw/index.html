@@ -20,7 +20,20 @@ header h1 span{color:#FF5E5B}
 .btn{white-space:nowrap;font:inherit;font-weight:800;font-size:15px;border:0;border-radius:14px;padding:10px 14px;background:#fff;color:#2B2340;box-shadow:0 2px 0 rgba(43,35,64,.15);cursor:pointer}
 .btn:active{transform:translateY(2px);box-shadow:none}
 .btn.hub{text-decoration:none;padding:9px 12px;font-size:15px}
-@media (max-width:480px){.btn.hub span,#undo span{display:none}header{gap:6px;padding:10px 8px}header .btn{padding:9px 11px}header h1{font-size:17px}}
+@media (max-width:480px){.btn.hub span,#undo span,#post span{display:none}header{gap:6px;padding:10px 8px}header .btn{padding:9px 11px}header h1{font-size:17px}}
+.btn.post{background:#FF6FB5;color:#fff}
+.modal{position:fixed;inset:0;z-index:20;background:rgba(43,35,64,.45);display:grid;place-items:center;padding:16px}
+.modal.hidden{display:none}
+.sheet{background:#FFF6E9;border-radius:24px;padding:20px;width:min(420px,100%);display:grid;gap:12px;box-shadow:0 20px 50px rgba(43,35,64,.3)}
+.sheet h2{margin:0;font-size:24px;font-weight:900}
+.sheet p{margin:0;color:#6B6485}
+.sheet img{width:100%;max-height:34vh;object-fit:contain;background:#fff;border-radius:14px;border:2px solid rgba(43,35,64,.1)}
+.who{display:flex;gap:8px;flex-wrap:wrap}
+.who button{font:inherit;font-weight:800;border:0;border-radius:999px;padding:9px 16px;background:#fff;color:#2B2340;box-shadow:0 2px 0 rgba(43,35,64,.12)}
+.who button.on{background:#FFB627}
+.sheet input{font:inherit;font-weight:700;font-size:17px;border:2px solid rgba(43,35,64,.15);border-radius:12px;padding:10px 12px;background:#fff}
+.sheet .acts{display:flex;gap:8px;justify-content:flex-end}
+.sheet a.btn{text-decoration:none}
 .btn.save{background:#2EC4B6;color:#fff}
 .stage{position:relative;margin:0 12px;border-radius:22px;background:#fff;box-shadow:0 6px 24px rgba(43,35,64,.12);overflow:hidden;touch-action:none}
 canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none}
@@ -65,6 +78,7 @@ footer{padding:10px 12px 12px;display:grid;gap:10px}
     <h1>Doodle <span>Studio</span></h1>
     <button class="btn" id="undo" aria-label="Undo">↩︎<span> Undo</span></button>
     <button class="btn" id="clear">New</button>
+    <button class="btn post" id="post">📌<span> Post</span></button>
     <button class="btn save" id="save">Save</button>
   </header>
   <div class="stage" id="stage">
@@ -76,6 +90,7 @@ footer{padding:10px 12px 12px;display:grid;gap:10px}
     <div class="row" id="opts"></div>
   </footer>
 </div>
+<div class="modal hidden" id="modal"><div class="sheet" id="sheet"></div></div>
 <div class="toast" id="toast"></div>
 <script>
 (function(){
@@ -104,6 +119,8 @@ const SHAPES = {
 const TEMPLATES = [['birthday','🎂','Birthday'],['thanks','💐','Thank you'],['weekend','📅','My weekend'],['color','🏠','Coloring'],['sea','🐠','Under the sea']];
 const shapeSVG = (k, fill, px) => `<svg viewBox="0 0 100 100" width="${px}" height="${px}" style="display:block;overflow:visible"><path d="${SHAPES[k]}" ${fill ? 'fill="currentColor"' : 'fill="none" stroke="currentColor" stroke-width="7" stroke-linejoin="round"'}/></svg>`;
 const STICKERS = ['⭐','❤️','🌈','🦄','🐱','🐶','🌸','🌻','☀️','🌙','🎈','🎂','🍓','🦋','👑','💎','🐠','🚀','⚽','🎨','😀','😍','🥳','✨'];
+const FAMILY = location.hostname === 'family.nikhilharsh.com';
+if(FAMILY){ const h = document.querySelector('.btn.hub'); h.href = '/'; h.querySelector('span').textContent = ' Family area'; }
 const store = { get(k,v){ try{ const x = localStorage.getItem(k); return x===null ? v : JSON.parse(x); }catch(e){ return v; } },
                 set(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); return true; }catch(e){ return false; } } };
 
@@ -420,6 +437,45 @@ function bubble(o, it){
   }
   o.fillStyle = '#2B2340'; o.textAlign = 'center'; o.textBaseline = 'middle'; o.fillText(txt, 0, it.s*0.05);
 }
+// ---------- post to the family art wall ----------
+const modal = document.getElementById('modal'), sheet = document.getElementById('sheet');
+modal.onclick = e => { if(e.target === modal) modal.classList.add('hidden'); };
+const shrink = (src, max, q) => new Promise(res => {
+  const k = Math.min(1, max / Math.max(src.width, src.height)), c = document.createElement('canvas');
+  c.width = Math.round(src.width*k); c.height = Math.round(src.height*k);
+  const o = c.getContext('2d'); o.fillStyle = '#fff'; o.fillRect(0, 0, c.width, c.height); o.drawImage(src, 0, 0, c.width, c.height);
+  c.toBlob(b => res({blob:b, w:c.width, h:c.height}), 'image/jpeg', q);
+});
+let artist = store.get('doodle.artist', null);
+document.getElementById('post').onclick = async () => {
+  select(null); if(textIn) commitText();
+  if(!FAMILY){
+    sheet.innerHTML = `<h2>Post to the family wall</h2><p>Posting works inside the family area, where only family can see it. Save this drawing first, then open Doodle Studio from the family area.</p>
+      <div class="acts"><button class="btn" id="mclose">Not now</button><a class="btn save" href="https://family.nikhilharsh.com/draw/">Open family Doodle</a></div>`;
+    modal.classList.remove('hidden'); document.getElementById('mclose').onclick = () => modal.classList.add('hidden'); return;
+  }
+  const art = compose(), preview = art.toDataURL('image/jpeg', .7);
+  sheet.innerHTML = `<h2>Post to the family wall 📌</h2><img src="${preview}" alt="Your drawing">
+    <p>Who made it?</p><div class="who" id="who">${['Zara','Samir','Mom','Dad'].map(n => `<button data-n="${n}" class="${n===artist?'on':''}">${n}</button>`).join('')}</div>
+    <input id="ttl" maxlength="60" placeholder="Give it a name (optional)">
+    <div class="acts"><button class="btn" id="mclose">Cancel</button><button class="btn post" id="mpost">Post it!</button></div>`;
+  modal.classList.remove('hidden');
+  document.getElementById('who').onclick = e => { const b = e.target.closest('button'); if(!b) return; artist = b.dataset.n; store.set('doodle.artist', artist); document.querySelectorAll('#who button').forEach(x => x.classList.toggle('on', x === b)); };
+  document.getElementById('mclose').onclick = () => modal.classList.add('hidden');
+  document.getElementById('mpost').onclick = async ev => {
+    if(!artist){ toast('Tap who made it first'); return; }
+    const btn = ev.currentTarget; btn.disabled = true; btn.textContent = 'Posting...';
+    try{
+      let full = await shrink(art, 1400, .85); if(full.blob.size > 1700000) full = await shrink(art, 1100, .7);
+      const thumb = await shrink(art, 420, .75);
+      const f = new FormData(); f.append('full', full.blob, 'full.jpg'); f.append('thumb', thumb.blob, 'thumb.jpg');
+      f.append('artist', artist); f.append('title', document.getElementById('ttl').value); f.append('w', full.w); f.append('h', full.h);
+      const r = await fetch('/api/art', {method:'POST', body:f, credentials:'same-origin'}); const d = await r.json().catch(() => ({}));
+      if(!r.ok || !d.ok) throw new Error(d.error || 'could not post');
+      modal.classList.add('hidden'); toast('Posted to the family wall! 🎉');
+    }catch(e){ btn.disabled = false; btn.textContent = 'Try again'; toast('Oops: ' + e.message); }
+  };
+};
 document.getElementById('save').onclick = () => {
   select(null);
   compose().toBlob(async blob => {
