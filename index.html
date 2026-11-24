@@ -112,7 +112,7 @@ h2{font-family:var(--display);font-weight:800;font-size:clamp(28px,4vw,40px);let
 .g1{--c:var(--coral);--bgp:linear-gradient(140deg,#FF6F6B,#FFB627)}
 .g2{--c:var(--aqua);--bgp:linear-gradient(140deg,#2EC4B6,#8E5CF7)}
 .g3{--c:var(--violet);--bgp:linear-gradient(140deg,#8E5CF7,#2EC4B6 90%)}
-.kc{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;width:62%;transform:rotate(-6deg)}
+.kc{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;width:62%;transform:rotate(-6deg)}
 .kc span{aspect-ratio:1;border-radius:14px;display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:clamp(20px,2.6vw,30px);color:var(--dark);background:rgba(255,255,255,.92);box-shadow:inset 0 -5px 0 rgba(0,0,0,.18),0 8px 18px rgba(0,0,0,.2)}
 .kc span.on{background:var(--marigold)}
 .kc span.paw{background:var(--aqua)}
@@ -153,6 +153,7 @@ footer a{color:var(--muted)}
   .games{grid-template-columns:1fr}
   .game{grid-template-columns:minmax(0,132px) minmax(0,1fr);grid-template-rows:auto auto;column-gap:16px;row-gap:14px;padding:12px 12px 14px;align-items:center}
   .pic{aspect-ratio:1;grid-row:1}
+  .kc{width:74%;gap:5px}.kc span{border-radius:9px;font-size:16px;box-shadow:inset 0 -3px 0 rgba(0,0,0,.18)}
   .gtext{padding-inline:0}
   .go{grid-column:1/-1;margin-inline:0}
   .bottom{grid-template-columns:1fr}
@@ -161,7 +162,6 @@ footer a{color:var(--muted)}
   .bname{display:none}
   .navlinks a{padding:7px 10px;font-size:14px}
   .game{grid-template-columns:minmax(0,104px) minmax(0,1fr)}
-  .kc{gap:6px}.kc span{border-radius:10px;font-size:18px}
   .key{width:46px;height:46px;font-size:20px}
   .key.space{width:104px}
 }
