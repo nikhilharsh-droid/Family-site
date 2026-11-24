@@ -147,6 +147,34 @@ h3{margin:0 0 8px;font-size:15px;font-weight:900;color:var(--muted);text-transfo
 .promo svg{width:100%;display:block}
 .confetti{position:fixed;top:-20px;width:10px;height:14px;z-index:70;pointer-events:none;border-radius:2px;animation:fall linear forwards}
 @keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+/* phones and tablets: bigger tap targets, board edge to edge, most-used buttons first */
+button,.btn,a{touch-action:manipulation}
+.sheet>.looks{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (pointer:coarse),(max-width:600px){.btn,.chip,.tab,.pick button{min-height:44px}.btn{min-width:44px;justify-content:center}.toggle{min-height:44px}}
+@media (max-width:600px){
+  :root{--bs:min(calc(100vw - 16px),600px)}
+  header{padding:6px 8px 4px}
+  .tabs{padding:0 8px 6px}
+  .tab{padding:9px 16px}
+  main{padding:0 8px 16px;gap:8px}
+  .boardcol{gap:6px}
+  .board{border-radius:12px;box-shadow:0 0 0 4px #fff,0 6px 18px rgba(43,35,64,.16)}
+  .pbar{min-height:42px;padding:5px 10px;border-radius:14px}
+  .pbar .av{width:28px;height:28px}
+  .side{width:calc(100vw - 16px);gap:8px}
+  .card{padding:12px;border-radius:18px}
+  .coach .owl{font-size:34px}
+  .bubble{font-size:16px;padding:8px 12px}
+  .coord{font-size:10px}
+  #puzPanel>.row{order:-1}
+  .sheet{padding:18px}
+  .sheet h2{font-size:23px}
+}
+@media (orientation:landscape) and (max-height:560px){
+  :root{--bs:calc(100dvh - 116px)}
+  main{grid-template-columns:auto minmax(240px,1fr);align-items:start;column-gap:14px}
+  .side{width:auto}
+}
 @media (prefers-reduced-motion:reduce){.coach .owl,.btn.pulse,.sq.hint::before{animation:none}.fly{transition:none}}
 </style>
 </head>
@@ -253,32 +281,18 @@ function load(k, d){ try { var v = localStorage.getItem('chess.' + k); return v 
 function save(k, v){ try { localStorage.setItem('chess.' + k, JSON.stringify(v)); } catch(e){} }
 
 /* ---------- themes + pieces (all original artwork) ---------- */
-var SHAPES = { // bold, standard silhouettes: pawn shortest, king tallest, every piece a different outline
-  p: '<path d="M37 79C37 69 41 63 45 59H55C59 63 63 69 63 79Z"/><rect x="35" y="52" width="30" height="8" rx="4"/><circle cx="50" cy="39" r="14"/>',
-  r: '<path d="M33 43H67L70 79H30Z"/><rect x="29" y="36" width="42" height="8" rx="3"/><path d="M27 17H38V25H45V17H55V25H62V17H73V37H27Z"/>',
-  n: '<path d="M71 79H31C31 67 37 59 47 53C43 54 36 57 31 59C24 62 17 56 19 49C21 43 28 37 34 33C36 27 40 21 45 18L47 8L54 17C67 19 77 31 77 47C77 60 73 69 71 79Z"/>',
-  b: '<path d="M41 60H59C61 66 63 72 65 79H35C37 72 39 66 41 60Z"/><rect x="37" y="53" width="26" height="8" rx="4"/><path d="M50 17C63 25 67 38 63 47C61 52 56 54 50 54C44 54 39 52 37 47C33 38 37 25 50 17Z"/><circle cx="50" cy="12" r="5.5"/>',
-  q: '<path d="M34 57H66L71 79H29Z"/><rect x="30" y="50" width="40" height="8" rx="4"/><path d="M27 25L34 44L39 19L46 40L50 14L54 40L61 19L66 44L73 25L68 51H32Z"/><circle cx="25" cy="22" r="5"/><circle cx="38" cy="15" r="5"/><circle cx="50" cy="10" r="5"/><circle cx="62" cy="15" r="5"/><circle cx="75" cy="22" r="5"/>',
-  k: '<path d="M34 52H66L70 79H30Z"/><rect x="29" y="44" width="42" height="9" rx="4"/><path d="M32 45C30 33 38 25 50 25C62 25 70 33 68 45Z"/><path d="M46 1H54V8H61V16H54V25H46V16H39V8H46Z"/>'
+var FACES = { // where faces go on the Staunton pieces: eye1 x,y, eye2 x,y, mouth y
+  p: [45,31,55,31,37], r: [44,50,56,50,57], n: [38.5,28.5,0,0,0], b: [44,41,55,41,47], q: [45,59,55,59,65], k: [44,37,56,37,43]
 };
-// details drawn on top in the outline colour (horse mane line, bishop slit, rook bricks)
-var DETAIL = {
-  n: '<path d="M54 18C66 22 73 33 73 46" fill="none" stroke-width="3.5" stroke-linecap="round" stroke-dasharray="1 7"/><circle cx="25" cy="50" r="2.2" stroke="none"/>',
-  b: '<path d="M56 25L47 36" fill="none" stroke-width="4" stroke-linecap="round"/>',
-  r: '<path d="M41 68H59" fill="none" stroke-width="2.5" stroke-linecap="round" opacity=".45"/>'
-};
-var FACES = { // eye1 x,y, eye2 x,y, mouth y
-  p: [45,38,55,38,45], r: [44,54,56,54,61], n: [43,32,0,0,0], b: [45,41,55,41,47], q: [44,65,56,65,71], k: [44,63,56,63,69]
-};
-var TOPS = { p: 25, r: 17, n: 8, b: 6, q: 5, k: 1 };
-var EARS = { p: 'M39 33L36 19L47 27Z M61 33L64 19L53 27Z' };
-var SPRITES = {
-  p: ['................','................','................','......oooo......','.....offffo.....','....offffffo....','....oeffffeo....','....offffffo....','.....offffo.....','......oooo......','.....oooooo.....','......offo......','.....offffo.....','....offffffo....','...oooooooooo...','................'],
-  r: ['................','..ooo..oo..ooo..','..ofo..oo..ofo..','..oooooooooooo..','..offffffffffo..','...oooooooooo...','...offffffffo...','...oeffffffeo...','...offffffffo...','...offffffffo...','...offffffffo...','..offffffffffo..','..offffffffffo..','.oooooooooooooo.','.oooooooooooooo.','................'],
-  n: ['................','.......oo.......','......ofoo......','.....offffoo....','....offfffffo...','...offeffffffo..','..offfffffffffo.','.offffffffffffo.','.oooooffffffffo.','......offffffo..','.....offffffo...','.....offffffo...','....offffffffo..','...oooooooooooo.','...oooooooooooo.','................'],
-  b: ['.......oo.......','......offo......','.......oo.......','......offo......','.....offffo.....','....offfoffo....','....offoffffo...','....oeffffeo....','.....offffo.....','......oooo......','.....oooooo.....','......offo......','.....offffo.....','....offffffo....','...oooooooooo...','...oooooooooo...'],
-  q: ['................','..o....oo....o..','.ofo..offo..ofo.','.ofo.offffo.ofo.','.offffffffffffo.','..offffffffffo..','..oeffffffffeo..','...offffffffo...','...oooooooooo...','....offffffo....','....offffffo....','...offffffffo...','..offffffffffo..','.oooooooooooooo.','.oooooooooooooo.','................'],
-  k: ['.......oo.......','......oooo......','.......oo.......','....oooooooo....','...offffffffo...','..offffffffffo..','..oeffffffffeo..','..offffffffffo..','...oooooooooo...','....offffffo....','....offffffo....','...offffffffo...','..offffffffffo..','.oooooooooooooo.','.oooooooooooooo.','................']
+var TOPS = { p: 18, r: 13, n: 6, b: 6, q: 6, k: 3 };
+var EARS = { p: 'M40 25L36 10L48 19Z M60 25L64 10L52 19Z' };
+var SPRITES = { // 16x16 pixel Staunton set for Blocky World
+  p: ['................','................','......oooo......','.....offffo.....','....offffffo....','....oeffffeo....','....offffffo....','.....offffo.....','....oooooooo....','......offo......','.....offffo.....','....offffffo....','...offffffffo...','..oooooooooooo..','..offffffffffo..','..oooooooooooo..'],
+  r: ['................','.ooo..oooo..ooo.','.ofo..offo..ofo.','.ofooooffoooofo.','.offffffffffffo.','.offffffffffffo.','..oooooooooooo..','...offffffffo...','...oeffffffeo...','...offffffffo...','...offffffffo...','...offffffffo...','..offffffffffo..','.oooooooooooooo.','.offffffffffffo.','.oooooooooooooo.'],
+  n: ['................','........oo......','.......ofoo.....','......offffoo...','.....offfffffo..','....offeffffffo.','...offffffffffo.','..offfffffffffo.','.offffffffffffo.','.oooooofffffffo.','......offffffo..','.....offffffo...','....offffffffo..','.oooooooooooooo.','.offffffffffffo.','.oooooooooooooo.'],
+  b: ['.......oo.......','......offo......','.......oo.......','......offo......','.....offffo.....','....offfoffo....','....offofffo....','....oeffffeo....','.....offffo.....','....oooooooo....','......offo......','.....offffo.....','....offffffo....','..oooooooooooo..','..offffffffffo..','..oooooooooooo..'],
+  q: ['................','..o....oo....o..','.ofo..offo..ofo.','.ofo.offffo.ofo.','.offffffffffffo.','..offffffffffo..','..oeffffffffeo..','...offffffffo...','....oooooooo....','.....offffo.....','.....offffo.....','....offffffo....','...offffffffo...','.oooooooooooooo.','.offffffffffffo.','.oooooooooooooo.'],
+  k: ['.......oo.......','......oooo......','.......oo.......','...oooooooooo...','..offffffffffo..','..oeffffffffeo..','..offffffffffo..','...offffffffo...','....oooooooo....','.....offffo.....','.....offffo.....','....offffffo....','...offffffffo...','.oooooooooooooo.','.offffffffffffo.','.oooooooooooooo.']
 };
 // Classic: an original Staunton-style set (flat fills, darker outline, soft side shading). Parts are drawn bottom-up.
 var STAUNTON = {
@@ -297,16 +311,17 @@ var ST_LINES = { // lighter detail lines: mane, crown band, ribs
   k: '<path d="M43 31L44.5 46M57 31L55.5 46M50 30V46"/>'
 };
 var stId = 0;
-function stauntonSVG(t, c, open){
-  var id = 'st' + (++stId), ring = ST_RING[t];
-  var out = open + '<defs><linearGradient id="' + id + '" x1="0" x2="1" y1="0" y2="0"><stop offset="0" stop-color="' + c.hi + '"/><stop offset=".38" stop-color="' + c.fill + '"/><stop offset="1" stop-color="' + c.lo + '"/></linearGradient></defs>' +
-    '<g fill="url(#' + id + ')" stroke="' + c.stroke + '" stroke-width="2.6" stroke-linejoin="round">' + STAUNTON[t] +
+function stauntonSVG(t, c, open, o){
+  o = o || {};
+  var id = 'st' + (++stId), ring = ST_RING[t], sw = look.sw || 2.6;
+  var out = open + (o.behind || '') + '<defs><linearGradient id="' + id + '" x1="0" x2="1" y1="0" y2="0"><stop offset="0" stop-color="' + c.hi + '"/><stop offset=".38" stop-color="' + c.fill + '"/><stop offset="1" stop-color="' + c.lo + '"/></linearGradient></defs>' +
+    '<g fill="url(#' + id + ')" stroke="' + c.stroke + '" stroke-width="' + sw + '" stroke-linejoin="round">' + STAUNTON[t] +
     '<rect x="' + ring[0] + '" y="71" width="' + ring[1] + '" height="9" rx="3"/><rect x="23" y="79" width="54" height="11" rx="3.5"/></g>' +
-    '<g fill="none" stroke="' + c.line + '" stroke-width="2.2" stroke-linecap="round">' + (ST_LINES[t] || '') +
+    '<g fill="none" stroke="' + c.line + '" stroke-width="2.2" stroke-linecap="round">' + (o.noLines ? '' : ST_LINES[t] || '') +
     '<path d="M29 84.5H71" opacity=".55"/></g>';
-  if (t === 'b') out += '<path d="M60 23L49.5 36.5" stroke="' + c.cut + '" stroke-width="3.6" stroke-linecap="round"/>';
-  if (t === 'n') out += '<ellipse cx="38.5" cy="28.5" rx="2.6" ry="3.3" fill="' + c.stroke + '"/><circle cx="24" cy="50.5" r="1.9" fill="' + c.stroke + '"/>';
-  return out + '</svg>';
+  if (t === 'b') out += '<path d="' + (o.extra ? 'M60 22L53.5 30.5' : 'M60 23L49.5 36.5') + '" stroke="' + c.cut + '" stroke-width="3.6" stroke-linecap="round"/>';
+  if (t === 'n' && !o.noEye) out += '<ellipse cx="38.5" cy="28.5" rx="2.6" ry="3.3" fill="' + c.stroke + '"/><circle cx="24" cy="50.5" r="1.9" fill="' + c.stroke + '"/>';
+  return out + (o.extra || '') + '</svg>';
 }
 var LOOKS = [
   { id: 'classic', name: 'Classic', emoji: '♟️', bg: '#EEF2F8', light: '#ECE9D6', dark: '#5878A6', cl: '#5878A6', cd: '#ECE9D6', staunton: 1,
@@ -314,44 +329,54 @@ var LOOKS = [
     b: { hi: '#727272', fill: '#4A4A4A', lo: '#2C2C2C', stroke: '#171717', line: '#8C8C8C', cut: '#A3A3A3' } },
   { id: 'blocky', name: 'Blocky World', emoji: '🧱', bg: '#E5F1D8', light: '#93C953', dark: '#7A5435', cl: '#4E7A22', cd: '#E8D3B0', pixel: 1,
     w: { fill: '#F0E1BE', stroke: '#5A4226', eye: '#2B2340' }, b: { fill: '#3FD0D4', stroke: '#0D4446', eye: '#0D2B2C' } },
-  { id: 'kitty', name: 'Kitty Café', emoji: '🐱', bg: '#FFF0F6', light: '#FFE3EE', dark: '#C9B3F0', cl: '#B08AC8', cd: '#FFF0F6', cat: 1,
+  { id: 'kitty', sw: 3.2, name: 'Kitty Café', emoji: '🐱', bg: '#FFF0F6', light: '#FFE3EE', dark: '#C9B3F0', cl: '#B08AC8', cd: '#FFF0F6', cat: 1,
     w: { fill: '#FFFFFF', stroke: '#6B4A5E', eye: '#4A3442', nose: '#FF8FB1' }, b: { fill: '#5E5873', stroke: '#26222F', eye: '#FFFFFF', nose: '#FF8FB1' } },
-  { id: 'critter', name: 'Critter Clash', emoji: '🔥', bg: '#EEF9E6', light: '#E3F6CF', dark: '#8CCB6A', cl: '#6FA94E', cd: '#F3FBEA', big: 1,
+  { id: 'critter', sw: 3.2, name: 'Critter Clash', emoji: '🔥', bg: '#EEF9E6', light: '#E3F6CF', dark: '#8CCB6A', cl: '#6FA94E', cd: '#F3FBEA', big: 1,
     w: { fill: '#FF9A4D', stroke: '#8A3B0B', eye: '#3A1A05', tuft: 'flame' }, b: { fill: '#4DA3FF', stroke: '#123E7A', eye: '#0B2446', tuft: 'drop' } },
-  { id: 'space', name: 'Space Race', emoji: '🚀', bg: '#ECEEFF', light: '#B9C2FF', dark: '#4B4F9E', cl: '#4B4F9E', cd: '#B9C2FF',
+  { id: 'space', sw: 3.2, name: 'Space Race', emoji: '🚀', bg: '#ECEEFF', light: '#B9C2FF', dark: '#4B4F9E', cl: '#4B4F9E', cd: '#B9C2FF',
     w: { fill: '#F4F7FF', stroke: '#2C3170', eye: '#2C3170' }, b: { fill: '#7CE07C', stroke: '#1F5E2A', eye: '#10301A', antenna: 1 } },
-  { id: 'candy', name: 'Candy Land', emoji: '🍭', bg: '#FFF4F8', light: '#FFF3D6', dark: '#FF9EC4', cl: '#E07AA6', cd: '#FFF3D6',
+  { id: 'candy', sw: 3.2, name: 'Candy Land', emoji: '🍭', bg: '#FFF4F8', light: '#FFF3D6', dark: '#FF9EC4', cl: '#E07AA6', cd: '#FFF3D6',
     w: { fill: '#FFFFFF', stroke: '#B04A7A', eye: '#7A2E52' }, b: { fill: '#8B5A3C', stroke: '#3F2414', eye: '#FFFFFF', sprinkles: 1, shine: 1 } }
 ];
 var look = LOOKS[0];
+function hex(c){ return [1,3,5].map(function(i){ return parseInt(c.substr(i, 2), 16); }); }
+function mix(a, b, t){ var x = hex(a), y = hex(b); return '#' + x.map(function(v, i){ return ('0' + Math.round(v + (y[i] - v) * t).toString(16)).slice(-2); }).join(''); }
+function lum(c){ var x = hex(c); return (x[0] * .3 + x[1] * .59 + x[2] * .11) / 255; }
+function tones(c){ // shading colours for any theme that doesn't set its own
+  if (c.lo) return c;
+  c.hi = mix(c.fill, '#FFFFFF', .55); c.lo = mix(c.fill, c.stroke, .28);
+  c.line = lum(c.fill) > .75 ? mix(c.fill, c.stroke, .3) : mix(c.fill, '#FFFFFF', .45);
+  c.cut = c.cut || c.stroke;
+  return c;
+}
 function pieceSVG(p, cls){
   var t = p.toLowerCase(), w = p !== t, c = w ? look.w : look.b;
   var open = '<svg class="' + (cls || 'pc') + '" viewBox="0 0 100 100" aria-hidden="true">';
-  if (look.staunton) return stauntonSVG(t, c, open);
   if (look.pixel){
-    var s = SPRITES[t], out = '';
+    var s = SPRITES[t], out = '', hi = mix(c.fill, '#FFFFFF', .45), lo = mix(c.fill, c.stroke, .35);
     for (var y = 0; y < 16; y++) for (var x = 0; x < 16; x++){
-      var ch = s[y][x], col = ch === 'o' ? c.stroke : ch === 'f' ? c.fill : ch === 'e' ? c.eye : '';
+      var ch = s[y][x], col = ch === 'o' ? c.stroke : ch === 'e' ? c.eye : '';
+      if (ch === 'f') col = s[y][x - 1] === 'o' ? hi : s[y][x + 1] === 'o' ? lo : c.fill; // same light-left, shade-right look as Classic
       if (col) out += '<rect x="' + (x * 6 + 2) + '" y="' + (y * 6 + 2) + '" width="6.3" height="6.3" fill="' + col + '"/>';
     }
-    // a little shading strip so the blocks look 3D
     return open + '<g shape-rendering="crispEdges">' + out + '</g></svg>';
   }
-  var f = FACES[t], mid = f[2] ? (f[0] + f[2]) / 2 : f[0], ey = f[1], extra = '', face = '';
+  tones(c);
+  if (look.staunton) return stauntonSVG(t, c, open);
+  var f = FACES[t], mid = f[2] ? (f[0] + f[2]) / 2 : f[0], face = '', behind = '', extra = '';
   if (look.big){
     [[f[0], f[1]], [f[2], f[3]]].forEach(function(e){ if (!e[0]) return;
       face += '<circle cx="' + e[0] + '" cy="' + e[1] + '" r="5.5" fill="#fff" stroke="' + c.stroke + '" stroke-width="1.6"/><circle cx="' + (e[0] + .8) + '" cy="' + (e[1] + .6) + '" r="3" fill="' + c.eye + '"/><circle cx="' + (e[0] + 1.8) + '" cy="' + (e[1] - .8) + '" r="1.1" fill="#fff"/>'; });
   } else {
-    face = '<g fill="' + c.eye + '"><circle cx="' + f[0] + '" cy="' + f[1] + '" r="' + (t === 'n' ? 4 : 3) + '"/>' + (f[2] ? '<circle cx="' + f[2] + '" cy="' + f[3] + '" r="3"/>' : '') + '</g>';
+    face = '<g fill="' + c.eye + '"><circle cx="' + f[0] + '" cy="' + f[1] + '" r="' + (t === 'n' ? 3.6 : 3) + '"/>' + (f[2] ? '<circle cx="' + f[2] + '" cy="' + f[3] + '" r="3"/>' : '') + '</g>';
   }
   if (f[4]){
     var my = f[4];
     if (look.cat) face += '<path d="M' + (mid - 2.5) + ' ' + (my - 3) + 'h5l-2.5 3z" fill="' + c.nose + '"/><path d="M' + (mid - 5) + ' ' + my + 'q2.5 3 5 0q2.5 3 5 0" fill="none" stroke="' + c.eye + '" stroke-width="2" stroke-linecap="round"/>' +
-      '<path d="M' + (mid - 9) + ' ' + (my - 2) + 'h-10M' + (mid - 9) + ' ' + (my + 2) + 'l-9 3M' + (mid + 9) + ' ' + (my - 2) + 'h10M' + (mid + 9) + ' ' + (my + 2) + 'l9 3" stroke="' + c.stroke + '" stroke-width="1.6" stroke-linecap="round"/>';
-    else face += '<path d="M' + (mid - 5) + ' ' + my + 'Q' + mid + ' ' + (my + 3.5) + ' ' + (mid + 5) + ' ' + my + '" fill="none" stroke="' + c.eye + '" stroke-width="2.6" stroke-linecap="round"/>';
+      '<path d="M' + (mid - 9) + ' ' + (my - 2) + 'h-8M' + (mid - 9) + ' ' + (my + 2) + 'l-7 3M' + (mid + 9) + ' ' + (my - 2) + 'h8M' + (mid + 9) + ' ' + (my + 2) + 'l7 3" stroke="' + c.stroke + '" stroke-width="1.6" stroke-linecap="round"/>';
+    else face += '<path d="M' + (mid - 4.5) + ' ' + my + 'Q' + mid + ' ' + (my + 3.2) + ' ' + (mid + 4.5) + ' ' + my + '" fill="none" stroke="' + c.eye + '" stroke-width="2.4" stroke-linecap="round"/>';
   }
-    var behind = '';
-  if (look.cat && EARS[t]) behind += '<path d="' + EARS[t] + '" fill="' + c.fill + '" stroke="' + c.stroke + '" stroke-width="4" stroke-linejoin="round"/>';
+  if (look.cat && EARS[t]) behind += '<path d="' + EARS[t] + '" fill="' + c.fill + '" stroke="' + c.stroke + '" stroke-width="2.8" stroke-linejoin="round"/>';
   var top = TOPS[t];
   if (c.antenna && t === 'p') behind += '<path d="M44 ' + (top + 4) + 'L37 ' + (top - 8) + 'M56 ' + (top + 4) + 'L63 ' + (top - 8) + '" stroke="' + c.stroke + '" stroke-width="3" stroke-linecap="round"/><circle cx="37" cy="' + (top - 9) + '" r="4" fill="#FFE14D" stroke="' + c.stroke + '" stroke-width="2"/><circle cx="63" cy="' + (top - 9) + '" r="4" fill="#FFE14D" stroke="' + c.stroke + '" stroke-width="2"/>';
   if (c.tuft && t === 'p'){
@@ -359,11 +384,8 @@ function pieceSVG(p, cls){
       ? '<path d="M50 ' + (top + 6) + 'C40 ' + (top - 2) + ' 46 ' + (top - 8) + ' 47 ' + (top - 13) + 'C52 ' + (top - 6) + ' 56 ' + (top - 8) + ' 55 ' + (top - 12) + 'C61 ' + (top - 3) + ' 58 ' + (top + 3) + ' 50 ' + (top + 6) + 'Z" fill="#FFD23F" stroke="' + c.stroke + '" stroke-width="2.5" stroke-linejoin="round"/>'
       : '<path d="M50 ' + (top - 13) + 'C45 ' + (top - 5) + ' 43 ' + (top - 1) + ' 43 ' + (top + 2) + 'A7 7 0 0 0 57 ' + (top + 2) + 'C57 ' + (top - 1) + ' 55 ' + (top - 5) + ' 50 ' + (top - 13) + 'Z" fill="#A8E1FF" stroke="' + c.stroke + '" stroke-width="2.5" stroke-linejoin="round"/>';
   }
-  if (c.sprinkles) extra += '<g stroke-width="3" stroke-linecap="round"><path d="M41 64l3-2" stroke="#FF6FB5"/><path d="M55 60l3 2" stroke="#FFE14D"/><path d="M49 70l-1 3" stroke="#5AC8FA"/><path d="M58 70l3-1" stroke="#7CE07C"/></g>';
-  return open + behind +
-    '<g fill="' + c.fill + '" stroke="' + c.stroke + '" stroke-width="4.5" stroke-linejoin="round">' + SHAPES[t] +
-    '<rect x="22" y="77" width="56" height="13" rx="6.5"/></g>' +
-    (DETAIL[t] ? '<g fill="' + c.stroke + '" stroke="' + c.stroke + '">' + DETAIL[t] + '</g>' : '') + extra + face + '</svg>';
+  if (c.sprinkles) extra += '<g stroke-width="3" stroke-linecap="round"><path d="M40 66l3-2" stroke="#FF6FB5"/><path d="M56 62l3 2" stroke="#FFE14D"/><path d="M48 70l-1 2.5" stroke="#5AC8FA"/><path d="M59 69l3-1" stroke="#7CE07C"/></g>';
+  return stauntonSVG(t, c, open, { behind: behind, extra: extra + face, noLines: t === 'k', noEye: t === 'n' });
 }
 function applyLook(id, quiet){
   look = LOOKS.filter(function(l){ return l.id === id; })[0] || LOOKS[0];
