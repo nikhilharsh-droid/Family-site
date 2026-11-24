@@ -106,7 +106,7 @@ h2{font-family:var(--display);font-weight:800;font-size:clamp(28px,4vw,40px);let
 .game{display:grid;grid-template-rows:auto 1fr auto;gap:14px;padding:14px 14px 20px;border-radius:var(--r);background:var(--surface);border:1px solid var(--line);text-decoration:none;transition:transform .2s ease,border-color .2s,background .2s;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
 .game:hover{transform:translateY(-4px);border-color:var(--c);background:rgba(255,255,255,.09)}
 .game:active{transform:translateY(0) scale(.98)}
-.pic{position:relative;border-radius:20px;aspect-ratio:4/3;max-width:100%;overflow:hidden;display:grid;place-items:center;background:var(--bgp)}
+.pic{position:relative;border-radius:20px;aspect-ratio:4/3;max-width:100%;overflow:hidden;display:grid;grid-template-columns:minmax(0,1fr);place-items:center;background:var(--bgp)}
 .pic svg,.pic .kc{transition:transform .3s cubic-bezier(.3,1.6,.5,1)}
 .game:hover .pic svg,.game:hover .pic .kc{transform:scale(1.06) rotate(-2deg)}
 .g1{--c:var(--coral);--bgp:linear-gradient(140deg,#FF6F6B,#FFB627)}
