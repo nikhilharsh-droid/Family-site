@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<html lang="en" class="js">
+<html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Harsh Family Hub</title>
-<meta name="description" content="Home base for the Harsh family: games we make at home, and where to find Nikhil at work.">
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Games we make at home for the kids: typing, drawing and chess.">
 <meta name="theme-color" content="#0B0D1F">
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -12,7 +13,7 @@
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://nikhilharsh.com/">
 <meta property="og:title" content="Harsh Family Hub">
-<meta property="og:description" content="Games we make at home, and where to find Nikhil at work.">
+<meta property="og:description" content="Games we make at home for the kids: typing, drawing and chess.">
 <meta property="og:image" content="https://nikhilharsh.com/assets/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -25,33 +26,35 @@
 @font-face{font-family:"Figtree";src:url(/assets/fonts/figtree-400.woff2) format("woff2");font-weight:400;font-display:swap}
 @font-face{font-family:"Figtree";src:url(/assets/fonts/figtree-500.woff2) format("woff2");font-weight:500;font-display:swap}
 @font-face{font-family:"Figtree";src:url(/assets/fonts/figtree-600.woff2) format("woff2");font-weight:600;font-display:swap}
-.skip{position:absolute;left:12px;top:-60px;z-index:50;background:var(--marigold);color:#14122B;font-weight:700;padding:10px 16px;border-radius:999px;text-decoration:none}
-.skip:focus{top:12px}
-/* Layout: one dark night-sky page lit by a slow coral/marigold/aqua glow; keycaps are the motif, games get the big stage, work stays small. */
+/* Layout: a kids-first front door. The night sky and keycaps stay; three big game tiles sit right under a short hero; grown-up stuff is one quiet line that leads to /about/. */
 :root{
   --bg:#0B0D1F;
   --surface:rgba(255,255,255,.06);
   --line:rgba(255,255,255,.12);
   --ink:#F4F2FF;
   --muted:#A9A8C6;
+  --dark:#14122B;
   --coral:#FF5E5B;
   --marigold:#FFB627;
   --aqua:#2EC4B6;
+  --violet:#8E5CF7;
   --display:"Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
   --body:"Figtree", "Segoe UI", system-ui, sans-serif;
-  --r:24px;
+  --r:28px;
   color-scheme:dark;
 }
 *{box-sizing:border-box}
 html,body{margin:0}
 body{background:var(--sky,var(--bg));transition:background 3s ease;color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.55;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--sky,var(--bg))}
 a{color:inherit}
-:focus-visible{outline:3px solid var(--marigold);outline-offset:3px;border-radius:8px}
+:focus-visible{outline:3px solid var(--marigold);outline-offset:3px;border-radius:10px}
+.skip{position:absolute;left:12px;top:-60px;z-index:50;background:var(--marigold);color:var(--dark);font-weight:700;padding:10px 16px;border-radius:999px;text-decoration:none}
+.skip:focus{top:12px}
 
-/* ambient glow */
-.glow{position:fixed;inset:-20vmax;z-index:0;pointer-events:none;filter:blur(70px);opacity:.55}
-.glow i{position:absolute;width:48vmax;height:48vmax;border-radius:50%}
-.glow i{transition:background 3s ease}
+/* sky: slow glow, stars at night, the sun by day */
+.glow{position:fixed;inset:-20vmax;z-index:0;pointer-events:none;filter:blur(70px);opacity:.5}
+.glow i{position:absolute;width:48vmax;height:48vmax;border-radius:50%;transition:background 3s ease}
 .glow i:nth-child(1){background:var(--g1,var(--coral));left:8%;top:2%;animation:drift1 22s ease-in-out infinite alternate}
 .glow i:nth-child(2){background:var(--g2,var(--marigold));right:6%;top:18%;width:38vmax;height:38vmax;opacity:.8;animation:drift2 26s ease-in-out infinite alternate}
 .glow i:nth-child(3){background:var(--g3,var(--aqua));left:30%;bottom:-4%;width:44vmax;height:44vmax;opacity:.7;animation:drift3 30s ease-in-out infinite alternate}
@@ -63,176 +66,107 @@ a{color:inherit}
 @keyframes twinkle{from{opacity:.25}to{opacity:1}}
 .orb{position:fixed;z-index:0;pointer-events:none;width:84px;height:84px;margin:-42px 0 0 -42px;transition:left 2s ease,top 2s ease,opacity 2s ease;opacity:0}
 .orb.sun{border-radius:50%;background:radial-gradient(circle,#FFF6D6 0 38%,#FFD166 52%,rgba(255,182,39,0) 72%);filter:drop-shadow(0 0 40px rgba(255,200,90,.7))}
-.skyline{color:var(--muted);font-weight:500;letter-spacing:.08em}
 .orb[hidden]{display:none}
 .season{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
-.grain{position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse at top,transparent 30%,rgba(11,13,31,.65) 80%)}
-.noise{position:fixed;inset:0;z-index:2;pointer-events:none;opacity:.07;mix-blend-mode:overlay;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
 
-.wrap{position:relative;z-index:1;width:min(1120px,100% - 40px);margin:0 auto}
-nav{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:22px 0}
-.navbar{position:sticky;top:0;z-index:20;padding:10px 0;margin:0 -8px}
-.navbar nav{padding:8px 8px 8px 14px;border-radius:999px;border:1px solid transparent;transition:background .3s,border-color .3s,box-shadow .3s}
-.navbar.stuck nav{background:rgba(11,13,31,.72);border-color:var(--line);box-shadow:0 10px 30px rgba(0,0,0,.35);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
-.navlinks a.on{color:#14122B;background:var(--marigold)}
+.wrap{position:relative;z-index:1;max-width:1160px;margin:0 auto;padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
+.navbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;padding-block:10px;margin:0 -8px}
+nav{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 8px 8px 14px;border-radius:999px;border:1px solid transparent;transition:background .3s,border-color .3s}
+.navbar.stuck nav{background:rgba(11,13,31,.78);border-color:var(--line);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
 .brand{display:flex;align-items:center;gap:10px;font-family:var(--display);font-weight:800;font-size:20px;letter-spacing:-.01em;text-decoration:none}
-.brand .dot{width:30px;height:30px;border-radius:9px;background:conic-gradient(from 200deg,var(--coral),var(--marigold),var(--aqua),var(--coral));box-shadow:0 0 24px rgba(255,94,91,.5)}
-.navlinks{display:flex;gap:6px}
+.brand .dot{width:30px;height:30px;border-radius:9px;background:conic-gradient(from 200deg,var(--coral),var(--marigold),var(--aqua),var(--coral))}
+.navlinks{display:flex;gap:4px}
 .navlinks a{text-decoration:none;color:var(--muted);font-weight:500;font-size:15px;padding:8px 14px;border-radius:999px;transition:color .2s,background .2s}
 .navlinks a:hover{color:var(--ink);background:var(--surface)}
+.navlinks a.grown{color:var(--ink);border:1px solid var(--line)}
 
-/* hero */
-.hero{padding:56px 0 40px;display:grid;gap:28px}
+/* hero: short, so the games are on the first screen */
+.hero{padding-block:28px 22px;display:grid;gap:16px;justify-items:start}
 .eyebrow{font-weight:600;font-size:14px;letter-spacing:.14em;text-transform:uppercase;color:var(--marigold)}
-h1{font-family:var(--display);font-weight:800;font-size:clamp(46px,9vw,112px);line-height:.92;letter-spacing:-.045em;margin:0;text-wrap:balance}
-.h1w{display:inline-block;opacity:0;transform:translateY(.45em) rotate(3deg);filter:blur(6px);animation:rise .9s cubic-bezier(.2,.8,.2,1) forwards}
-.h1w:nth-child(1){animation-delay:.05s}.h1w:nth-child(2){animation-delay:.13s}.h1w:nth-child(3){animation-delay:.21s}.h1w:nth-child(4){animation-delay:.29s}
-.grad .h1w:nth-child(1){animation-delay:.42s,1.4s}.grad .h1w:nth-child(2){animation-delay:.52s,1.4s}
-@keyframes rise{to{opacity:1;transform:none;filter:none}}
-.grad .h1w{background:linear-gradient(100deg,var(--coral),var(--marigold),var(--aqua),var(--marigold),var(--coral));background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:rise .9s cubic-bezier(.2,.8,.2,1) forwards,shimmer 9s ease-in-out infinite alternate}
-.grad .h1w:nth-child(2){background-position:40% 0}
-@keyframes shimmer{from{background-position:0% 0}to{background-position:100% 0}}
+h1{font-family:var(--display);font-weight:800;font-size:clamp(44px,8vw,92px);line-height:.92;letter-spacing:-.045em;margin:0;text-wrap:balance}
 h1 .grad{background:linear-gradient(100deg,var(--coral) 10%,var(--marigold) 50%,var(--aqua) 90%);-webkit-background-clip:text;background-clip:text;color:transparent}
-.lede{max-width:34ch;font-size:clamp(18px,2.2vw,22px);color:var(--muted);margin:0}
+.lede{max-width:36ch;font-size:clamp(18px,2.2vw,21px);color:var(--muted);margin:0}
 
-/* keycaps */
-.keys{display:flex;flex-wrap:wrap;gap:10px;perspective:700px;transform-style:preserve-3d;transition:transform .25s ease-out;transform:rotateX(var(--kx,0deg)) rotateY(var(--ky,0deg))}
-.keys .key{animation:bob 4.5s ease-in-out infinite;animation-delay:calc(var(--i,0) * -.7s)}
-@keyframes bob{0%,100%{translate:0 0}50%{translate:0 -6px}}
-.key{font-family:var(--display);color:var(--ink);padding:0;-webkit-appearance:none;appearance:none;--c:var(--coral);width:62px;height:62px;border-radius:14px;display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:26px;
+/* keycaps: tap or type to light them */
+.keys{display:flex;flex-wrap:wrap;gap:8px}
+.key{-webkit-appearance:none;appearance:none;padding:0;--c:var(--coral);width:52px;height:52px;border-radius:13px;display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:22px;color:var(--ink);
   background:linear-gradient(180deg,rgba(255,255,255,.14),rgba(255,255,255,.04));border:1px solid var(--line);
-  box-shadow:inset 0 -5px 0 rgba(0,0,0,.35),0 8px 22px rgba(0,0,0,.35);transition:transform .12s,box-shadow .12s,background .12s;user-select:none;cursor:pointer}
-.key.lit,.key:active{transform:translateY(3px);background:var(--c);color:#14122B;box-shadow:inset 0 -2px 0 rgba(0,0,0,.25),0 0 28px var(--c)}
+  box-shadow:inset 0 -5px 0 rgba(0,0,0,.35),0 8px 22px rgba(0,0,0,.3);transition:transform .12s,box-shadow .12s,background .12s;user-select:none;cursor:pointer}
+.key.lit,.key:active{transform:translateY(3px);background:var(--c);color:var(--dark);box-shadow:inset 0 -2px 0 rgba(0,0,0,.25),0 0 24px var(--c)}
 .key:nth-child(3n+2){--c:var(--marigold)}
 .key:nth-child(3n){--c:var(--aqua)}
-.key.space{width:150px;font-size:14px;font-family:var(--body);font-weight:600;letter-spacing:.08em;color:var(--muted)}
-.keyhint{font-size:14px;color:var(--muted);margin:0}
+.key.space{width:128px;font-size:13px;font-family:var(--body);font-weight:600;letter-spacing:.08em;color:var(--muted)}
 
-/* sections */
-section{padding:40px 0;scroll-margin-top:76px}
-.sechead{display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:20px}
-h2{font-family:var(--display);font-weight:800;font-size:clamp(30px,4.5vw,48px);letter-spacing:-.03em;line-height:1;margin:0;text-wrap:balance}
+/* game tiles */
+section{padding-block:18px;scroll-margin-top:84px}
+.sechead{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+h2{font-family:var(--display);font-weight:800;font-size:clamp(28px,4vw,40px);letter-spacing:-.03em;line-height:1;margin:0}
 .sechead p{margin:0;color:var(--muted);font-size:15px}
+.games{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+.game{display:grid;grid-template-rows:auto 1fr auto;gap:14px;padding:14px 14px 20px;border-radius:var(--r);background:var(--surface);border:1px solid var(--line);text-decoration:none;transition:transform .2s ease,border-color .2s,background .2s;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.game:hover{transform:translateY(-4px);border-color:var(--c);background:rgba(255,255,255,.09)}
+.game:active{transform:translateY(0) scale(.98)}
+.pic{position:relative;border-radius:20px;aspect-ratio:4/3;max-width:100%;overflow:hidden;display:grid;place-items:center;background:var(--bgp)}
+.pic svg,.pic .kc{transition:transform .3s cubic-bezier(.3,1.6,.5,1)}
+.game:hover .pic svg,.game:hover .pic .kc{transform:scale(1.06) rotate(-2deg)}
+.g1{--c:var(--coral);--bgp:linear-gradient(140deg,#FF6F6B,#FFB627)}
+.g2{--c:var(--aqua);--bgp:linear-gradient(140deg,#2EC4B6,#8E5CF7)}
+.g3{--c:var(--violet);--bgp:linear-gradient(140deg,#8E5CF7,#2EC4B6 90%)}
+.kc{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;width:62%;transform:rotate(-6deg)}
+.kc span{aspect-ratio:1;border-radius:14px;display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:clamp(20px,2.6vw,30px);color:var(--dark);background:rgba(255,255,255,.92);box-shadow:inset 0 -5px 0 rgba(0,0,0,.18),0 8px 18px rgba(0,0,0,.2)}
+.kc span.on{background:var(--marigold)}
+.kc span.paw{background:var(--aqua)}
+.pic svg{width:70%;height:auto;filter:drop-shadow(0 10px 20px rgba(0,0,0,.25))}
+.gtext{padding-inline:6px;display:grid;gap:4px;align-content:start}
+.game h3{font-family:var(--display);font-weight:800;font-size:clamp(26px,2.8vw,34px);letter-spacing:-.03em;line-height:1;margin:0}
+.game p{margin:0;color:var(--muted);font-size:16px}
+.go{margin-inline:6px;display:flex;align-items:center;justify-content:center;gap:10px;min-height:56px;border-radius:999px;font-family:var(--display);font-weight:800;font-size:21px;letter-spacing:-.01em;background:var(--c);color:var(--dark);box-shadow:inset 0 -4px 0 rgba(0,0,0,.2)}
+.go svg{width:20px;height:20px}
 
-.games{display:grid;grid-template-columns:1fr 1fr;gap:18px}
-.games .feature{min-height:430px}
-.feature.dfeat::before{background:linear-gradient(140deg,rgba(46,196,182,.5),rgba(142,92,247,.4) 55%,rgba(255,111,181,.3))}
-.dfeat:hover{border-color:rgba(46,196,182,.6)}
-.feature.cfeat{grid-column:1/-1;min-height:320px}
-.feature.cfeat::before{background:linear-gradient(140deg,rgba(142,92,247,.55),rgba(46,196,182,.35) 50%,rgba(255,182,39,.3))}
-.cfeat:hover{border-color:rgba(142,92,247,.6)}
-.cart{position:absolute;right:22px;top:22px;width:230px;transform:rotate(-6deg);filter:drop-shadow(0 12px 24px rgba(0,0,0,.35))}
-.cart .hop{animation:knight 4s ease-in-out infinite}
-@keyframes knight{0%,15%{transform:translate(0,0)}30%{transform:translate(25px,-75px)}42%,62%{transform:translate(50px,-100px)}75%{transform:translate(25px,-75px)}88%,100%{transform:translate(0,0)}}
-.dart{position:absolute;right:16px;top:16px;width:200px;transform:rotate(5deg);filter:drop-shadow(0 12px 24px rgba(0,0,0,.35))}
-.dart .ln{fill:none;stroke-width:6;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:420;stroke-dashoffset:420;animation:draw 7s ease-in-out infinite}
-.dart .l2{animation-delay:.9s}.dart .l3{animation-delay:1.8s}
-.dart .pop{opacity:0;animation:pop 7s ease-in-out infinite;animation-delay:2.6s}
-@keyframes draw{0%{stroke-dashoffset:420}30%,85%{stroke-dashoffset:0}100%{stroke-dashoffset:0;opacity:0}}
-@keyframes pop{0%,10%{opacity:0;transform:scale(.4)}20%,80%{opacity:1;transform:none}100%{opacity:0}}
-.dart .pop{transform-box:fill-box;transform-origin:center}
-/* featured art */
+/* art wall (filled from the family art wall when there are featured drawings) */
 .artgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px}
-.artpiece{padding:0;border:0;background:#fff;border-radius:18px;overflow:hidden;aspect-ratio:3/4;cursor:zoom-in;box-shadow:0 12px 30px rgba(0,0,0,.35);transition:transform .25s}
+.artpiece{padding:0;border:0;background:#fff;border-radius:18px;overflow:hidden;aspect-ratio:3/4;max-width:100%;cursor:zoom-in;box-shadow:0 12px 30px rgba(0,0,0,.35);transition:transform .25s}
 .artpiece:nth-child(odd){transform:rotate(-1.5deg)}.artpiece:nth-child(even){transform:rotate(1.5deg)}
 .artpiece:hover{transform:rotate(0) scale(1.03)}
 .artpiece img{width:100%;height:100%;object-fit:cover;display:block}
 .artview{position:fixed;inset:0;z-index:40;background:rgba(8,9,22,.94);display:grid;place-items:center;padding:20px;cursor:zoom-out}
 .artview[hidden]{display:none}
 .artview img{max-width:100%;max-height:100%;border-radius:14px;background:#fff}
-/* gentle scroll-in */
-.js .reveal{opacity:0;translate:0 26px;transition:opacity .7s ease,translate .7s cubic-bezier(.2,.7,.2,1),transform .25s ease,border-color .25s}
-.js .reveal.in{opacity:1;translate:none}
-.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
-.feature{position:relative;overflow:hidden;padding:30px;display:grid;gap:16px;min-height:340px;align-content:end;text-decoration:none;transition:transform .25s,border-color .25s}
-.feature{transform:perspective(1000px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg)) translateY(var(--ty,0px));transform-style:preserve-3d}
-.feature:hover{--ty:-4px;border-color:transparent}
-/* animated gradient edge */
-@property --ang{syntax:"<angle>";inherits:false;initial-value:0deg}
-.feature::after{content:"";position:absolute;inset:0;border-radius:inherit;padding:1.5px;background:conic-gradient(from var(--ang),#FF5E5B,#FFB627,#2EC4B6,#8E5CF7,#FF5E5B);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;opacity:.35;transition:opacity .3s;animation:spin 6s linear infinite;pointer-events:none}
-.feature:hover::after{opacity:1}
-@keyframes spin{to{--ang:360deg}}
-/* cursor spotlight */
-.spot{position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .3s;background:radial-gradient(420px circle at var(--mx,50%) var(--my,50%),rgba(255,255,255,.16),transparent 45%);z-index:0}
-.card:hover > .spot{opacity:1}
-.feature::before{content:"";position:absolute;inset:0;background:linear-gradient(140deg,rgba(255,94,91,.55),rgba(255,182,39,.35) 45%,rgba(46,196,182,.25));z-index:-1}
-.feature .art{position:absolute;right:-10px;top:-6px;display:grid;grid-template-columns:repeat(3,64px);gap:10px;transform:rotate(-8deg);opacity:.95}
-.feature .art span{height:64px;border-radius:14px;display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:26px;color:#14122B;background:rgba(255,255,255,.9);box-shadow:inset 0 -5px 0 rgba(0,0,0,.18)}
-.feature .art span.on{background:var(--marigold)}
-.feature .art span.paw{background:var(--aqua)}
-.tag{justify-self:start;font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:6px 12px;border-radius:999px;background:rgba(11,13,31,.55);border:1px solid var(--line)}
-.feature h3{font-family:var(--display);font-weight:800;font-size:clamp(34px,5vw,56px);letter-spacing:-.035em;line-height:.95;margin:0}
-.feature p{margin:0;max-width:40ch;color:#FFF3E6}
-.play{justify-self:start;display:inline-flex;align-items:center;gap:10px;font-weight:600;font-size:17px;padding:14px 22px;border-radius:999px;background:var(--ink);color:#14122B;box-shadow:0 10px 30px rgba(0,0,0,.35);transition:gap .2s}
-.feature:hover .play{gap:16px}
-.side{display:grid;gap:18px}
-.soon{padding:24px;display:grid;gap:8px;border-style:dashed;align-content:center}
-.soon h3{font-family:var(--display);font-weight:700;font-size:24px;letter-spacing:-.02em;margin:0}
-.soon p{margin:0;color:var(--muted);font-size:15px}
 
-.familycard{margin-top:18px;padding:20px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;text-decoration:none;transition:transform .25s,border-color .25s}
-.familycard:hover{transform:translateY(-3px);border-color:rgba(46,196,182,.6)}
-.familycard .ft{display:flex;align-items:center;gap:14px}
-.familycard .lock{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;font-size:22px;background:linear-gradient(135deg,rgba(46,196,182,.35),rgba(255,182,39,.25));border:1px solid var(--line)}
-.familycard b{display:block;font-family:var(--display);font-weight:700;font-size:21px;letter-spacing:-.01em}
-.familycard span.sub{color:var(--muted);font-size:15px}
-.familycard .go{font-weight:600;font-size:15px;padding:10px 18px;border-radius:999px;background:var(--ink);color:#14122B;white-space:nowrap}
+/* family area and the grown-ups line */
+.strip{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;padding:18px 22px;border-radius:22px;background:var(--surface);border:1px solid var(--line);text-decoration:none;transition:border-color .2s,transform .2s}
+.strip:hover{transform:translateY(-2px);border-color:rgba(46,196,182,.6)}
+.strip .ft{display:flex;align-items:center;gap:14px;min-width:0}
+.strip .ico{flex:none;width:44px;height:44px;border-radius:14px;display:grid;place-items:center;font-size:21px;background:linear-gradient(135deg,rgba(46,196,182,.35),rgba(255,182,39,.25));border:1px solid var(--line)}
+.strip b{display:block;font-family:var(--display);font-weight:700;font-size:20px;letter-spacing:-.01em}
+.strip .sub{color:var(--muted);font-size:15px}
+.strip .pill{font-weight:600;font-size:15px;padding:10px 18px;border-radius:999px;background:var(--ink);color:var(--dark);white-space:nowrap}
+.bottom{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.strip.quiet{background:transparent;border-style:dashed}
+.strip.quiet:hover{border-color:var(--marigold)}
+.strip.quiet .pill{background:transparent;color:var(--ink);border:1px solid var(--line)}
 
-/* work */
-.work{display:grid;grid-template-columns:1fr 1.4fr;gap:18px}
-.work .intro{padding:28px;display:grid;gap:12px;align-content:start}
-.work .intro p{margin:0;color:var(--muted)}
-.work .intro strong{color:var(--ink);font-weight:600}
-.timeline{padding:12px 28px}
-.row{display:grid;grid-template-columns:120px 1fr;gap:16px;padding:16px 0;border-bottom:1px solid var(--line)}
-.row:last-child{border-bottom:0}
-.row .when{font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--marigold);padding-top:3px}
-.row b{display:block;font-family:var(--display);font-weight:700;font-size:20px;letter-spacing:-.01em}
-.row span{color:var(--muted);font-size:15px}
+footer{padding-block:28px 48px;color:var(--muted);font-size:14px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;border-top:1px solid var(--line);margin-top:20px}
+footer a{color:var(--muted)}
 
-.companies{margin-top:32px;overflow:hidden;-webkit-mask:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);mask:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent)}
-.track{display:flex;align-items:center;gap:56px;width:max-content;padding:6px 28px;animation:marquee 38s linear infinite}
-.companies:hover .track{animation-play-state:paused}
-@keyframes marquee{to{transform:translateX(-50%)}}
-.co{display:flex;align-items:center;justify-content:center;height:40px}
-.co b{font-family:var(--display);font-weight:800;font-size:20px;letter-spacing:-.02em;line-height:1;color:var(--muted)}
-.co img{max-height:28px;max-width:140px;filter:brightness(0) invert(1);opacity:.85}
-.li{justify-self:start;display:inline-flex;align-items:center;gap:10px;font-weight:600;font-size:16px;padding:12px 20px;border-radius:999px;text-decoration:none;background:#0A66C2;color:#fff;transition:transform .2s}
-.li:hover{transform:translateY(-2px)}
-.li[hidden]{display:none}
-@media (max-width:520px){ .track{gap:40px} .co img{max-height:24px;max-width:118px} }
-
-footer{padding:40px 0 56px;color:var(--muted);font-size:14px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;border-top:1px solid var(--line);margin-top:24px}
-
-@media (max-width:820px){
-  .games,.work{grid-template-columns:1fr}
-  .navlinks a{padding:8px 10px}
-  .hero{padding-top:28px}
-  .games .feature{min-height:0;padding-top:170px}
-  .feature .art{right:-6px;top:14px}
-  .dart{width:150px;right:12px;top:12px}
-  .cart{width:150px;right:12px;top:14px}
-  .feature.cfeat{min-height:0}
-  .row{grid-template-columns:1fr;gap:4px}
+@media (max-width:900px){
+  .games{grid-template-columns:1fr}
+  .game{grid-template-columns:minmax(0,132px) minmax(0,1fr);grid-template-rows:auto auto;column-gap:16px;row-gap:14px;padding:12px 12px 14px;align-items:center}
+  .pic{aspect-ratio:1;grid-row:1}
+  .gtext{padding-inline:0}
+  .go{grid-column:1/-1;margin-inline:0}
+  .bottom{grid-template-columns:1fr}
 }
-@media (max-width:420px){
-  .key{width:52px;height:52px;font-size:22px}
-  .key.space{width:120px}
-  .feature .art{grid-template-columns:repeat(3,52px)}
-  .feature .art span{height:52px;font-size:22px}
+@media (max-width:460px){
   .bname{display:none}
-  .navlinks{gap:2px}
   .navlinks a{padding:7px 10px;font-size:14px}
+  .game{grid-template-columns:minmax(0,104px) minmax(0,1fr)}
+  .kc{gap:6px}.kc span{border-radius:10px;font-size:18px}
+  .key{width:46px;height:46px;font-size:20px}
+  .key.space{width:104px}
 }
 @media (prefers-reduced-motion:reduce){
-  .glow i{animation:none}
-  .stars i{animation:none}
-  .dart .ln{animation:none;stroke-dashoffset:0}.cart .hop{animation:none}.dart .pop{animation:none;opacity:1}
-  .js .reveal{opacity:1;translate:none}
-  .h1w{animation:none!important;opacity:1!important}
-  .keys .key{animation:none!important}
-  .feature::after,.track{animation:none!important}
-  .grad .h1w{animation:none!important}
+  .glow i,.stars i{animation:none}
   *{transition:none!important}
 }
 </style>
@@ -242,131 +176,88 @@ footer{padding:40px 0 56px;color:var(--muted);font-size:14px;display:flex;justif
 <div class="stars" id="stars" aria-hidden="true"></div>
 <div class="orb" id="orb" aria-hidden="true"></div>
 <canvas class="season" id="season" aria-hidden="true"></canvas>
-<div class="grain" aria-hidden="true"></div>
-<div class="noise" aria-hidden="true"></div>
 
 <a class="skip" href="#play">Skip to the games</a>
 <div class="wrap">
   <div class="navbar" id="navbar"><nav>
     <a class="brand" href="#top" aria-label="Harsh Family, back to top"><span class="dot" aria-hidden="true"></span><span class="bname">Harsh Family</span></a>
     <div class="navlinks">
-      <a href="#play" data-sec="play">Play</a>
-      <a href="#art" data-sec="art" id="navart" hidden>Art</a>
-      <a href="#work" data-sec="work">Work</a>
+      <a href="#play">Play</a>
+      <a href="#art" id="navart" hidden>Art</a>
       <a href="https://family.nikhilharsh.com">Family 🔒</a>
+      <a class="grown" href="/about/">About</a>
     </div>
   </nav></div>
 
   <main id="main">
   <header class="hero" id="top">
-    <div class="eyebrow">Chapel Hill, NC<span class="skyline" id="skyline"></span></div>
-    <h1 aria-label="Home base for the Harsh family."><span class="h1w" aria-hidden="true">Home</span> <span class="h1w" aria-hidden="true">base</span> <span class="h1w" aria-hidden="true">for</span> <span class="h1w" aria-hidden="true">the</span> <span class="grad"><span class="h1w" aria-hidden="true">Harsh</span> <span class="h1w" aria-hidden="true">family.</span></span></h1>
-    <p class="lede">The games we make, the things we're into, and where to find Nikhil at work.</p>
+    <div class="eyebrow">The Harsh family<span id="skyline"></span></div>
+    <h1>Pick a <span class="grad">game.</span></h1>
+    <p class="lede">We make these at home. Tap one to play, no sign-in needed.</p>
     <div class="keys" id="keys" role="group" aria-label="Keyboard toy: tap or type H, O, M or E">
       <button type="button" class="key" data-k="h">H</button><button type="button" class="key" data-k="o">O</button><button type="button" class="key" data-k="m">M</button><button type="button" class="key" data-k="e">E</button><button type="button" class="key space" data-k=" " aria-label="Space">SPACE</button>
     </div>
-    <p class="keyhint">Go on, tap the keys. Home row hands ready.</p>
   </header>
 
-  <section id="play">
-    <div class="sechead reveal"><h2>Play</h2><p>Games made at home, for the kids.</p></div>
+  <section id="play" aria-label="Games">
     <div class="games">
-      <a class="card feature reveal" href="https://play.nikhilharsh.com">
-        <div class="art" aria-hidden="true"><span>F</span><span class="on">J</span><span class="paw">🐾</span><span class="on">A</span><span>S</span><span>D</span></div>
-        <span class="tag">Typing game</span>
-        <h3>Paws &amp; Keys</h3>
-        <p>Learn to type with a pet friend. Pop bubbles, race the snail, raise critters and guard a block world at night.</p>
-        <span class="play">Play now <span aria-hidden="true">→</span></span>
+      <a class="game g1" href="https://play.nikhilharsh.com">
+        <div class="pic" aria-hidden="true"><div class="kc"><span>F</span><span class="on">J</span><span class="paw">🐾</span><span class="on">A</span><span>S</span><span>D</span></div></div>
+        <div class="gtext"><h3>Paws &amp; Keys</h3><p>Learn to type with a pet friend.</p></div>
+        <span class="go">Play <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M6 3.5v13l10-6.5z" fill="currentColor"/></svg></span>
       </a>
-      <a class="card feature dfeat reveal" href="/draw/">
-        <svg class="dart" viewBox="0 0 220 170" aria-hidden="true">
-          <rect x="6" y="6" width="208" height="158" rx="18" fill="rgba(255,255,255,.92)"/>
-          <path class="ln l1" d="M40 120 C60 60 90 60 100 95 S140 140 170 70" stroke="#FF5E5B"/>
-          <path class="ln l2" d="M150 120 L158 102 L176 100 L162 88 L166 70 L150 80 L134 70 L138 88 L124 100 L142 102 Z" stroke="#8E5CF7"/>
-          <path class="ln l3" d="M52 58 c0-10 14-14 18-4 c4-10 18-6 18 4 c0 12-18 22-18 22 s-18-10-18-22z" stroke="#2EC4B6"/>
-          <text x="176" y="52" font-size="26" class="pop">⭐</text>
-        </svg>
-        <span class="tag">Drawing</span>
-        <h3>Doodle Studio</h3>
-        <p>Draw, fill, make comics, add stickers and words, then save it or post it to the family wall.</p>
-        <span class="play">Start drawing <span aria-hidden="true">→</span></span>
+      <a class="game g2" href="/draw/">
+        <div class="pic" aria-hidden="true">
+          <svg viewBox="0 0 220 170"><rect x="6" y="6" width="208" height="158" rx="18" fill="#fff"/>
+            <g fill="none" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M40 120 C60 60 90 60 100 95 S140 140 170 70" stroke="#FF5E5B"/>
+              <path d="M150 120 L158 102 L176 100 L162 88 L166 70 L150 80 L134 70 L138 88 L124 100 L142 102 Z" stroke="#8E5CF7" fill="#FFD166"/>
+              <path d="M52 58 c0-10 14-14 18-4 c4-10 18-6 18 4 c0 12-18 22-18 22 s-18-10-18-22z" stroke="#2EC4B6"/>
+            </g></svg>
+        </div>
+        <div class="gtext"><h3>Doodle Studio</h3><p>Draw, color and make comics.</p></div>
+        <span class="go">Draw <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M6 3.5v13l10-6.5z" fill="currentColor"/></svg></span>
       </a>
-      <a class="card feature cfeat reveal" href="/chess/">
-        <svg class="cart" viewBox="0 0 220 220" aria-hidden="true">
-          <rect x="4" y="4" width="212" height="212" rx="20" fill="#fff"/>
-          <g><rect x="10" y="10" width="50" height="50" fill="#FFF1D9"/><rect x="60" y="10" width="50" height="50" fill="#7CCBB6"/><rect x="110" y="10" width="50" height="50" fill="#FFF1D9"/><rect x="160" y="10" width="50" height="50" fill="#7CCBB6"/><rect x="10" y="60" width="50" height="50" fill="#7CCBB6"/><rect x="60" y="60" width="50" height="50" fill="#FFF1D9"/><rect x="110" y="60" width="50" height="50" fill="#7CCBB6"/><rect x="160" y="60" width="50" height="50" fill="#FFF1D9"/><rect x="10" y="110" width="50" height="50" fill="#FFF1D9"/><rect x="60" y="110" width="50" height="50" fill="#7CCBB6"/><rect x="110" y="110" width="50" height="50" fill="#FFF1D9"/><rect x="160" y="110" width="50" height="50" fill="#7CCBB6"/><rect x="10" y="160" width="50" height="50" fill="#7CCBB6"/><rect x="60" y="160" width="50" height="50" fill="#FFF1D9"/><rect x="110" y="160" width="50" height="50" fill="#7CCBB6"/><rect x="160" y="160" width="50" height="50" fill="#FFF1D9"/></g>
-          <g transform="translate(160 160) scale(.5)"><g fill="#40366A" stroke="#19132E" stroke-width="4" stroke-linejoin="round"><path d="M30 77L33 41H67L70 77Z"/><path d="M26 42V18H36V26H45V18H55V26H64V18H74V42Z"/><rect x="22" y="75" width="56" height="13" rx="6.5"/></g><g fill="#fff"><circle cx="43" cy="55" r="3"/><circle cx="57" cy="55" r="3"/></g></g>
-          <g class="hop"><g transform="translate(10 110) scale(.5)"><g fill="#fff" stroke="#2B2340" stroke-width="4" stroke-linejoin="round"><path d="M30 77C29 63 35 55 43 49C37 51 29 51 25 45C22 39 28 30 37 26L41 15L48 23C65 23 75 38 73 56L71 77Z"/><rect x="22" y="75" width="56" height="13" rx="6.5"/></g><circle cx="47" cy="33" r="3" fill="#2B2340"/></g></g>
-        </svg>
-        <span class="tag">Chess</span>
-        <h3>Chess Club</h3>
-        <p>Play chess with a friend on one screen, or solve puzzles: checkmates, forks and free pieces. Easy, medium or tricky.</p>
-        <span class="play">Let's play <span aria-hidden="true">→</span></span>
+      <a class="game g3" href="/chess/">
+        <div class="pic" aria-hidden="true">
+          <svg viewBox="0 0 220 220" style="width:52%"><rect x="4" y="4" width="212" height="212" rx="20" fill="#fff"/>
+            <g><rect x="10" y="10" width="50" height="50" fill="#FFF1D9"/><rect x="60" y="10" width="50" height="50" fill="#7CCBB6"/><rect x="110" y="10" width="50" height="50" fill="#FFF1D9"/><rect x="160" y="10" width="50" height="50" fill="#7CCBB6"/><rect x="10" y="60" width="50" height="50" fill="#7CCBB6"/><rect x="60" y="60" width="50" height="50" fill="#FFF1D9"/><rect x="110" y="60" width="50" height="50" fill="#7CCBB6"/><rect x="160" y="60" width="50" height="50" fill="#FFF1D9"/><rect x="10" y="110" width="50" height="50" fill="#FFF1D9"/><rect x="60" y="110" width="50" height="50" fill="#7CCBB6"/><rect x="110" y="110" width="50" height="50" fill="#FFF1D9"/><rect x="160" y="110" width="50" height="50" fill="#7CCBB6"/><rect x="10" y="160" width="50" height="50" fill="#7CCBB6"/><rect x="60" y="160" width="50" height="50" fill="#FFF1D9"/><rect x="110" y="160" width="50" height="50" fill="#7CCBB6"/><rect x="160" y="160" width="50" height="50" fill="#FFF1D9"/></g>
+            <g transform="translate(160 160) scale(.5)"><g fill="#40366A" stroke="#19132E" stroke-width="4" stroke-linejoin="round"><path d="M30 77L33 41H67L70 77Z"/><path d="M26 42V18H36V26H45V18H55V26H64V18H74V42Z"/><rect x="22" y="75" width="56" height="13" rx="6.5"/></g><g fill="#fff"><circle cx="43" cy="55" r="3"/><circle cx="57" cy="55" r="3"/></g></g>
+            <g transform="translate(60 110) scale(.5)"><g fill="#fff" stroke="#2B2340" stroke-width="4" stroke-linejoin="round"><path d="M30 77C29 63 35 55 43 49C37 51 29 51 25 45C22 39 28 30 37 26L41 15L48 23C65 23 75 38 73 56L71 77Z"/><rect x="22" y="75" width="56" height="13" rx="6.5"/></g><circle cx="47" cy="33" r="3" fill="#2B2340"/></g>
+          </svg>
+        </div>
+        <div class="gtext"><h3>Chess Club</h3><p>Play a friend or solve puzzles.</p></div>
+        <span class="go">Play <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M6 3.5v13l10-6.5z" fill="currentColor"/></svg></span>
       </a>
     </div>
   </section>
 
   <section id="art" hidden>
-    <div class="sechead reveal"><h2>From the art wall</h2><p>Made in Doodle Studio.</p></div>
-    <div class="artgrid reveal" id="artgrid"></div>
+    <div class="sechead"><h2>From the art wall</h2><p>Made in Doodle Studio.</p></div>
+    <div class="artgrid" id="artgrid"></div>
   </section>
   <div class="artview" id="artview" role="dialog" aria-label="Drawing" hidden><img id="artbig" alt="A drawing from the family art wall"></div>
 
-  <section id="family" style="padding-top:0">
-    <a class="card familycard reveal" href="https://family.nikhilharsh.com">
-      <div class="ft"><div class="lock" aria-hidden="true">🔒</div><div><b>Family area</b><span class="sub">For family members only. Sign in with Google.</span></div></div>
-      <span class="go">Open <span aria-hidden="true">→</span></span>
-    </a>
-  </section>
-
-  <section id="work">
-    <div class="sechead reveal"><h2>Nikhil at work</h2><p>The short version.</p></div>
-    <div class="work">
-      <div class="card intro reveal">
-        <p><strong>Nikhil Harsh</strong> is President of BigScoots and a revenue leader who has run sales, customer success and revenue operations at growing software and cybersecurity companies.</p>
-        <p>He has seen companies through venture, private equity and IPO stages, and lives in Chapel Hill with his family.</p>
-        <a class="li" id="linkedin" href="#" hidden>Connect on LinkedIn <span aria-hidden="true">↗</span></a>
-      </div>
-      <div class="card timeline reveal">
-        <div class="row"><div class="when">Now</div><div><b>President, BigScoots</b></div></div>
-        <div class="row"><div class="when">Before</div><div><b>Revenue leadership</b></div></div>
-        <div class="row"><div class="when">Datto</div><div><b>Scaled through VC, PE and IPO</b></div></div>
-        <div class="row"><div class="when">Early</div><div><b>Inverness Graham</b></div></div>
-      </div>
+  <section aria-label="More">
+    <div class="bottom">
+      <a class="strip" href="https://family.nikhilharsh.com">
+        <div class="ft"><div class="ico" aria-hidden="true">🔒</div><div><b>Family area</b><span class="sub">For family members. Sign in with Google.</span></div></div>
+        <span class="pill">Open</span>
+      </a>
+      <a class="strip quiet" href="/about/">
+        <div class="ft"><div class="ico" aria-hidden="true">👋</div><div><b>For grown-ups</b><span class="sub">Who made this, and Nikhil at work.</span></div></div>
+        <span class="pill">About</span>
+      </a>
     </div>
-    <div class="companies reveal" aria-label="Companies"><div class="track" id="logotrack">
-      <div class="co" data-logo="https://www.bigscoots.com/wp-content/uploads/2022/10/bigscoots-logo-white.svg"><b>BigScoots</b></div>
-      <div class="co" data-logo="assets/logos/datto.png"><b>Datto</b></div>
-      <div class="co" data-logo="https://www.invernessgraham.com/wp-content/uploads/logo-white.svg"><b>Inverness Graham</b></div>
-      <div class="co" data-logo="https://www.cytracom.com/images/cytracom-logo.svg"><b>Cytracom</b></div>
-      <div class="co" data-logo="https://www.alloy.com/static/img/logo.svg"><b>Alloy</b></div>
-      <div class="co" data-logo="https://www.bankofamerica.com/content/images/ContextualSiteGraphics/Logos/en_US/logos/colored_flagscape-v2.png"><b>Bank of America</b></div>
-      <div class="co" data-logo="https://www17.wellsfargomedia.com/assets/images/rwd/wf_logo_220x23.png"><b>Wells Fargo</b></div>
-    </div></div>
   </section>
-
   </main>
   <footer>
     <span>© 2026 The Harsh family</span>
-    <span>Made at home in Chapel Hill.</span>
+    <span>Made at home. <a href="/privacy.html">Privacy</a></span>
   </footer>
 </div>
-
 <script>
 (function(){
-  // Settings: paste the LinkedIn profile address here to show the button.
-  var LINKEDIN_URL = 'https://www.linkedin.com/in/nikhil-harsh/';
-  if(LINKEDIN_URL){ var li = document.getElementById('linkedin'); li.href = LINKEDIN_URL; li.hidden = false; }
-  // Company logos: data-logo points at each company's official logo file (on its own site, or in assets/logos/).
-  // If the file loads it replaces the name; if not, the name stays.
-  var lt = document.getElementById('logotrack');
-  if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches){ [].slice.call(lt.children).forEach(function(c){ var d = c.cloneNode(true); d.setAttribute('aria-hidden', 'true'); lt.appendChild(d); }); }
-  else { lt.style.flexWrap = 'wrap'; lt.style.justifyContent = 'center'; lt.style.width = 'auto'; }
-  document.querySelectorAll('.co[data-logo]').forEach(function(el){
-    var img = new Image(); img.alt = el.querySelector('b').textContent; img.decoding = 'async';
-    img.onload = function(){ el.replaceChild(img, el.querySelector('b')); };
-    img.src = el.dataset.logo;
-  });
   var keys = {};
   document.querySelectorAll('#keys .key').forEach(function(el){ keys[el.dataset.k] = el; });
   function light(k){
@@ -379,18 +270,10 @@ footer{padding:40px 0 56px;color:var(--muted);font-size:14px;display:flex;justif
     if(keys[k]){ if(k === ' ') e.preventDefault(); light(k); }
   });
   Object.keys(keys).forEach(function(k){ keys[k].addEventListener('pointerdown', function(){ light(k); }); keys[k].addEventListener('click', function(e){ if(e.detail === 0) light(k); }); });
-  // sticky bar: solid once scrolled; the current section's pill lights up
+  // sticky bar goes solid once scrolled
   var bar = document.getElementById('navbar');
-  function onScroll(){ bar.classList.toggle('stuck', window.scrollY > 40); }
+  function onScroll(){ bar.classList.toggle('stuck', window.scrollY > 30); }
   window.addEventListener('scroll', onScroll, {passive:true}); onScroll();
-  var pills = {}; document.querySelectorAll('.navlinks a[data-sec]').forEach(function(a){ pills[a.dataset.sec] = a; });
-  if('IntersectionObserver' in window){
-    var spy = new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting){ Object.keys(pills).forEach(function(k){ pills[k].classList.toggle('on', k === e.target.id); }); } }); }, {rootMargin:'-45% 0px -50% 0px'});
-    ['play','art','work'].forEach(function(id){ var el = document.getElementById(id); if(el) spy.observe(el); });
-    // gentle scroll-in
-    var rv = new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); rv.unobserve(e.target); } }); }, {rootMargin:'0px 0px -8% 0px'});
-    document.querySelectorAll('.reveal').forEach(function(el){ rv.observe(el); });
-  } else document.querySelectorAll('.reveal').forEach(function(el){ el.classList.add('in'); });
   // featured art from the family art wall (pictures only)
   fetch('/api/featured').then(function(r){ return r.json(); }).then(function(d){
     if(!d.ok || !d.art.length) return;
@@ -401,9 +284,8 @@ footer{padding:40px 0 56px;color:var(--muted);font-size:14px;display:flex;justif
     g.onclick = function(e){ var b = e.target.closest('.artpiece'); if(!b) return; big.src = '/featured/' + b.dataset.id + '.jpg'; v.hidden = false; };
     v.onclick = function(){ v.hidden = true; };
     document.addEventListener('keydown', function(e){ if(e.key === 'Escape') v.hidden = true; });
-    if(window.IntersectionObserver){ var sec = document.getElementById('art'); spy.observe(sec); document.querySelectorAll('#art .reveal').forEach(function(el){ rv.observe(el); }); }
   }).catch(function(){});
-  // real sky: colors, stars and the sun follow the actual time in Chapel Hill (add ?sky=dawn|day|golden|dusk|night to preview)
+  // real sky: colors, stars and the sun follow the actual time at home (add ?sky=dawn|day|golden|dusk|night to preview)
   (function(){
     var LAT = 35.913, LNG = -79.056, rad = Math.PI/180, dayMs = 864e5, J1970 = 2440588, J2000 = 2451545, e = rad*23.4397, J0 = 0.0009;
     function toDays(d){ return d/dayMs - 0.5 + J1970 - J2000; }
@@ -424,7 +306,7 @@ footer{padding:40px 0 56px;color:var(--muted);font-size:14px;display:flex;justif
       golden:{sky:'#140F26', g1:'#FF8C42', g2:'#FFC15E', g3:'#FF5E5B', stars:0, name:'Golden hour'},
       dusk:  {sky:'#110D28', g1:'#C04D8E', g2:'#FF7E5F', g3:'#5B3FB0', stars:.6, name:'Sunset'}
     };
-    var stars = document.getElementById('stars'), orb = document.getElementById('orb'), line = document.getElementById('skyline');
+    var stars = document.getElementById('stars'), orb = document.getElementById('orb');
     for(var i = 0; i < 90; i++){ var st = document.createElement('i'); var sz = Math.random() < .15 ? 3 : 2; st.style.cssText = 'left:' + (Math.random()*100) + '%;top:' + (Math.random()*70) + '%;width:' + sz + 'px;height:' + sz + 'px;animation-delay:' + (-Math.random()*4) + 's;animation-duration:' + (3 + Math.random()*4) + 's'; stars.appendChild(st); }
     function update(){
       var now = new Date(), forced = (location.search.match(/[?&]sky=(\w+)/) || [])[1];
@@ -441,12 +323,10 @@ footer{padding:40px 0 56px;color:var(--muted);font-size:14px;display:flex;justif
       // sun only, and only on wider screens; no moon
       orb.className = 'orb sun'; orb.hidden = !isDay || window.innerWidth < 700;
       orb.style.left = (8 + 84*f) + 'vw'; orb.style.top = (34 - 24*Math.sin(Math.PI*f)) + 'vh'; orb.style.opacity = (f < .03 || f > .97) ? .35 : .9;
-      var time = now.toLocaleTimeString('en-US', {hour:'numeric', minute:'2-digit', timeZone:'America/New_York'});
-      line.textContent = ' · ' + time + ' · ' + c.name;
     }
     update(); setInterval(update, 60000);
   })();
-  // seasonal themes: the page decorates itself by date in Chapel Hill (add ?season=snow|christmas|thanksgiving|fireworks|halloween|diwali|hearts to preview)
+  // seasonal themes: the page decorates itself by date at home (add ?season=snow|christmas|thanksgiving|fireworks|halloween|diwali|hearts to preview)
   (function(){
     var cv = document.getElementById('season'), ctx = cv.getContext('2d');
     var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -532,21 +412,6 @@ footer{padding:40px 0 56px;color:var(--muted);font-size:14px;display:flex;justif
     if(reduce && theme === 'fireworks'){ for(var b = 0; b < 3; b++) burst(); bursts.forEach(function(p){ for(var s = 0; s < 30; s++){ p.x += p.vx; p.y += p.vy; } }); }
     requestAnimationFrame(frame);
   })();
-  // polish: cursor spotlight + gentle 3D tilt on cards, keycaps lean toward the pointer (mouse only, not on touch)
-  if(window.matchMedia('(hover: hover) and (pointer: fine)').matches && !window.matchMedia('(prefers-reduced-motion: reduce)').matches){
-    document.querySelectorAll('.card').forEach(function(c){
-      var sp = document.createElement('i'); sp.className = 'spot'; c.insertBefore(sp, c.firstChild);
-      c.addEventListener('pointermove', function(e){ var r = c.getBoundingClientRect(), x = (e.clientX - r.left)/r.width, y = (e.clientY - r.top)/r.height;
-        c.style.setProperty('--mx', (x*100) + '%'); c.style.setProperty('--my', (y*100) + '%');
-        if(c.classList.contains('feature')){ c.style.setProperty('--ry', ((x - .5)*7) + 'deg'); c.style.setProperty('--rx', ((.5 - y)*7) + 'deg'); } });
-      c.addEventListener('pointerleave', function(){ c.style.setProperty('--rx', '0deg'); c.style.setProperty('--ry', '0deg'); });
-    });
-    var kb = document.getElementById('keys'), hero = document.getElementById('top');
-    hero.addEventListener('pointermove', function(e){ var r = kb.getBoundingClientRect(), x = (e.clientX - (r.left + r.width/2))/innerWidth, y = (e.clientY - (r.top + r.height/2))/innerHeight;
-      kb.style.setProperty('--ky', (x*24) + 'deg'); kb.style.setProperty('--kx', (-y*24) + 'deg'); });
-    hero.addEventListener('pointerleave', function(){ kb.style.setProperty('--ky', '0deg'); kb.style.setProperty('--kx', '0deg'); });
-  }
-  document.querySelectorAll('#keys .key').forEach(function(k, i){ k.style.setProperty('--i', i); });
   // one small welcome: the keys light in order once on load
   if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches){
     ['h','o','m','e'].forEach(function(k, i){ setTimeout(function(){ light(k); }, 500 + i*180); });
