@@ -42,8 +42,8 @@ header h1 span{color:var(--coral)}
 .card .b{background:linear-gradient(140deg,#8E5CF7,#2EC4B6);overflow:hidden}
 .card .b::before{content:"";position:absolute;inset:7%;border-radius:inherit;border:3px dashed rgba(255,255,255,.55)}
 .card .b svg{width:42%;height:auto;opacity:.95}
-.card .f{background:#fff;transform:rotateY(180deg);border:3px solid transparent}
-.card .f svg{width:86%;height:86%}
+.card .f{background:#fff;transform:rotateY(180deg);border:3px solid transparent;grid-template-rows:minmax(0,1fr) auto;padding:6% 4% 7%;gap:2px}
+.card .f svg{width:100%;height:100%;min-height:0}
 .card.got .f{border-color:var(--c)}
 .card.got{--c:var(--sun)}
 .card.got.p0{--c:var(--p0)}.card.got.p1{--c:var(--p1)}
@@ -53,7 +53,7 @@ header h1 span{color:var(--coral)}
 @keyframes shake{25%{transform:rotateY(180deg) translateX(-6px)}75%{transform:rotateY(180deg) translateX(6px)}}
 .card:not(.up):hover .in{transform:translateY(-3px)}
 .card:disabled{cursor:default}
-.name{position:absolute;left:50%;bottom:6%;transform:translateX(-50%);font-size:clamp(10px,1.4vw,14px);font-weight:900;color:var(--muted);white-space:nowrap;pointer-events:none}
+.name{font-size:clamp(10px,1.4vw,14px);font-weight:900;color:var(--muted);white-space:nowrap;pointer-events:none;line-height:1}
 .toast{position:fixed;left:50%;top:22%;transform:translate(-50%,-10px);background:var(--ink);color:#fff;font-weight:900;font-size:clamp(20px,5vw,30px);padding:12px 22px;border-radius:18px;opacity:0;transition:opacity .2s,transform .2s;pointer-events:none;z-index:30;white-space:nowrap}
 .toast.on{opacity:1;transform:translate(-50%,0)}
 /* setup + end sheets */
@@ -155,7 +155,7 @@ var CRITTERS = [
   {n:'Glim', c:'#FFD23F', ear:'star', mark:'belly', eye:'happy'},
   {n:'Puff', c:'#8FD3FF', ear:'tuft', mark:'cheeks', eye:'sleepy'},
   {n:'Nib', c:'#FF5E5B', ear:'horns', mark:'belly', eye:'round'},
-  {n:'Wobble', c:'#3FA796', ear:'fin', mark:'spots', eye:'big'},
+  {n:'Wobble', c:'#5B8CFF', ear:'fin', mark:'belly', eye:'big'},
   {n:'Dot', c:'#B8A9C9', ear:'mouse', mark:'none', eye:'round'},
   {n:'Coco', c:'#B07A4F', ear:'floppy', mark:'belly', eye:'happy'},
   {n:'Frost', c:'#E8F4FF', ear:'wings', mark:'cheeks', eye:'big'}
@@ -180,7 +180,7 @@ function critterSVG(i){
     case 'fin': back = '<path d="M36 30C38 14 50 6 64 10C58 14 58 22 62 30Z" fill="' + d + '" ' + s + '/>'; break;
     case 'mouse': back = '<circle cx="24" cy="34" r="15" fill="' + c + '" ' + s + '/><circle cx="76" cy="34" r="15" fill="' + c + '" ' + s + '/><circle cx="24" cy="34" r="8" fill="#FFC6DD"/><circle cx="76" cy="34" r="8" fill="#FFC6DD"/>'; break;
     case 'floppy': front = '<path d="M27 38C16 40 13 58 18 66C24 64 28 54 30 44Z" fill="' + d + '" ' + s + '/><path d="M73 38C84 40 87 58 82 66C76 64 72 54 70 44Z" fill="' + d + '" ' + s + '/>'; break;
-    case 'wings': back = '<path d="M22 56C8 50 4 36 10 30C16 40 22 42 26 44Z" fill="#fff" ' + s + '/><path d="M78 56C92 50 96 36 90 30C84 40 78 42 74 44Z" fill="#fff" ' + s + '/>'; break;
+    case 'wings': back = '<path d="M24 52C14 52 4 46 3 36C9 40 13 38 15 34C17 40 21 40 23 37C24 42 26 46 28 48Z" fill="#fff" ' + s + '/><path d="M76 52C86 52 96 46 97 36C91 40 87 38 85 34C83 40 79 40 77 37C76 42 74 46 72 48Z" fill="#fff" ' + s + '/>'; break;
   }
   var body = '<path d="M50 24C72 24 82 42 82 60C82 80 68 90 50 90C32 90 18 80 18 60C18 42 28 24 50 24Z" fill="' + c + '" ' + s + '/>';
   var mark = '';
@@ -189,8 +189,8 @@ function critterSVG(i){
   if(k.mark === 'belly') mark = '<ellipse cx="50" cy="76" rx="17" ry="11" fill="' + l + '"/>';
   if(k.mark === 'cheeks' || k.eye === 'happy') mark += '<ellipse cx="31" cy="64" rx="6" ry="4" fill="#FF7FA8" opacity=".55"/><ellipse cx="69" cy="64" rx="6" ry="4" fill="#FF7FA8" opacity=".55"/>';
   var eyes;
-  if(k.eye === 'happy') eyes = '<path d="M33 54Q39 46 45 54M55 54Q61 46 67 54" ' + s + ' fill="none" stroke-width="3.5"/>';
-  else if(k.eye === 'sleepy') eyes = '<path d="M33 52Q39 58 45 52M55 52Q61 58 67 52" ' + s + ' fill="none" stroke-width="3.5"/>';
+  if(k.eye === 'happy') eyes = '<path d="M33 54Q39 46 45 54M55 54Q61 46 67 54" ' + s.replace('width="3"', 'width="3.5"') + ' fill="none"/>';
+  else if(k.eye === 'sleepy') eyes = '<path d="M33 52Q39 58 45 52M55 52Q61 58 67 52" ' + s.replace('width="3"', 'width="3.5"') + ' fill="none"/>';
   else { var r = k.eye === 'big' ? 9 : 7; eyes = '<circle cx="39" cy="52" r="' + r + '" fill="#fff" ' + s + '/><circle cx="61" cy="52" r="' + r + '" fill="#fff" ' + s + '/><circle cx="40" cy="53" r="' + (r - 3.2) + '" fill="' + INK + '"/><circle cx="62" cy="53" r="' + (r - 3.2) + '" fill="' + INK + '"/><circle cx="41.5" cy="50.5" r="1.6" fill="#fff"/><circle cx="63.5" cy="50.5" r="1.6" fill="#fff"/>'; }
   var mouth = '<path d="M44 66Q50 72 56 66" ' + s + ' fill="none"/>';
   if(k.ear === 'horns') mouth = '<path d="M43 66Q50 72 57 66" ' + s + ' fill="none"/><path d="M46 67.5L47.5 71L49 68M51 68L52.5 71L54 67.5" fill="#fff" stroke="' + INK + '" stroke-width="1.6" stroke-linejoin="round"/>';
