@@ -385,7 +385,7 @@ function move(who, dir){
   sfx[who]();
   if(gatesOpen() !== wasOpen) sfx.click();
   if(!homeBefore && atHome(who)) sfx.home();
-  if(!(N.pushed && N.pushed.sank)) draw(); else { place(els[who], S[who]); document.getElementById('moves').textContent = moves + ' moves'; }
+  if(!(N.pushed && N.pushed.sank)) draw(); else { place(els[who], S[who]); document.getElementById('moves').textContent = moves + (moves === 1 ? ' move' : ' moves'); }
   if(won(B, S)) finish();
 }
 function gatesOpen(){ var o = ''; B.base.forEach(function(t, i){ if(t === 'G' || t === 'H') o += tileOpenNow(i) ? 1 : 0; }); return o; }
@@ -417,7 +417,7 @@ function finish(){
   setTimeout(function(){
     sfx.win();
     document.getElementById('winAcorns').textContent = '🌰'.repeat(a) + '◌'.repeat(3 - a);
-    document.getElementById('winAcorns').setAttribute('aria-label', a + ' acorns out of 3');
+    document.getElementById('winAcorns').setAttribute('aria-label', a + (a === 1 ? ' acorn' : ' acorns') + ' out of 3');
     document.getElementById('winSub').textContent = moves + ' moves. ' + (a === 3 ? 'Super teamwork!' : a === 2 ? 'Can you do it in fewer?' : 'You did it together!');
     document.getElementById('nextBtn').hidden = lvl >= LEVELS.length - 1;
     document.getElementById('winT').textContent = lvl >= LEVELS.length - 1 ? 'All puzzles done!' : 'Both home!';

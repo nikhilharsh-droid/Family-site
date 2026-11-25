@@ -111,7 +111,7 @@ main{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:14px;p
 <main>
   <div class="scene" id="scene" aria-hidden="true">
     <svg id="sky" preserveAspectRatio="xMidYMax slice"><g id="world"><g id="deco"></g><g id="blocks"></g><g id="topper"></g></g></svg>
-    <div class="height"><b id="hNum">0</b> blocks</div>
+    <div class="height"><b id="hNum">0</b> <span id="hWord">blocks</span></div>
     <div class="goal" id="goalTag"></div>
   </div>
   <div class="panel">
@@ -370,7 +370,7 @@ function newGame(){
   G = {h:0, goal:store.goal, turn:0, streak:0, right:[0, 0], tries:[0, 0], gold:0, retry:[[], []], lock:false, q:null};
   blocksG.innerHTML = ''; buildScene(G.goal); drawTopper(0);
   document.getElementById('goalTag').textContent = {10:'🌳 Treetops', 20:'☁️ Clouds', 35:'🌙 The moon'}[G.goal] || G.goal + ' blocks';
-  document.getElementById('hNum').textContent = 0;
+  document.getElementById('hNum').textContent = 0; document.getElementById('hWord').textContent = 'blocks';
   fitView(); drawStreak(); ask();
 }
 function players(){ return store.n === 2 ? 2 : 1; }
@@ -425,7 +425,7 @@ function addBlock(p, gold){
   var b = blockShape(G.h, p, gold); b.classList.add('new');
   blocksG.appendChild(b);
   G.h++;
-  document.getElementById('hNum').textContent = G.h;
+  document.getElementById('hNum').textContent = G.h; document.getElementById('hWord').textContent = G.h === 1 ? 'block' : 'blocks';
   requestAnimationFrame(function(){ requestAnimationFrame(function(){ b.classList.remove('new'); }); });
   sfx.thud(); drawTopper(G.h); camera(true);
 }
