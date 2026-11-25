@@ -1,0 +1,505 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sky Tower</title>
+<meta name="description" content="A team math game: answer to stack blocks and build a tower to the moon.">
+<meta name="theme-color" content="#FFF6E9">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Sky Tower">
+<link rel="icon" href="/favicon.ico">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{--ink:#2B2340;--muted:#6B6485;--cream:#FFF6E9;--sun:#FFB627;--coral:#FF5E5B;--aqua:#2EC4B6;--grape:#8E5CF7;--p0:#FF5E5B;--p1:#2EC4B6}
+html,body{margin:0;height:100%;background:var(--cream);font-family:ui-rounded,"SF Pro Rounded",system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink);user-select:none;-webkit-user-select:none;overscroll-behavior:none}
+button{font:inherit;color:inherit;touch-action:manipulation;cursor:pointer}
+:focus-visible{outline:3px solid var(--grape);outline-offset:3px}
+.app{display:grid;grid-template-rows:auto minmax(0,1fr);height:100%;height:100dvh;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+header{display:flex;align-items:center;gap:8px;padding:10px 12px}
+header h1{margin:0 auto 0 4px;font-size:clamp(19px,5vw,24px);font-weight:900;letter-spacing:-.02em;white-space:nowrap}
+header h1 span{color:var(--grape)}
+.btn{white-space:nowrap;font-weight:800;font-size:15px;border:0;border-radius:14px;padding:10px 14px;background:#fff;color:var(--ink);box-shadow:0 2px 0 rgba(43,35,64,.15);text-decoration:none;display:inline-flex;align-items:center;gap:6px;min-height:44px}
+.btn:active{transform:translateY(2px);box-shadow:none}
+.btn.pri{background:var(--aqua);color:#fff}
+.btn.sun{background:var(--sun)}
+main{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:14px;padding:0 12px 14px;min-height:0}
+.scene{position:relative;border-radius:24px;overflow:hidden;background:#9BD8FF;box-shadow:0 6px 24px rgba(43,35,64,.12);min-height:0}
+.scene svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+#world{transition:transform .8s cubic-bezier(.3,1,.4,1)}
+.blk{transition:transform .55s cubic-bezier(.4,1.6,.5,1);transform-box:fill-box;transform-origin:50% 100%}
+.blk.new{transform:translate(0,-420px)}
+.blk.wob{animation:wob .5s ease}
+@keyframes wob{30%{transform:rotate(-3deg)}70%{transform:rotate(2deg)}}
+.height{position:absolute;left:12px;top:12px;background:rgba(255,255,255,.9);border-radius:14px;padding:6px 12px;font-weight:900;font-size:15px;box-shadow:0 2px 0 rgba(43,35,64,.12)}
+.height b{font-size:22px}
+.goal{position:absolute;right:12px;top:12px;background:rgba(43,35,64,.75);color:#fff;border-radius:14px;padding:6px 12px;font-weight:800;font-size:14px}
+.panel{display:grid;grid-template-rows:auto auto minmax(0,1fr) auto;gap:12px;min-height:0}
+.turn{display:flex;align-items:center;gap:10px;background:#fff;border-radius:18px;padding:10px 14px;box-shadow:0 0 0 3px var(--c,var(--sun)),0 2px 0 rgba(43,35,64,.1);font-weight:900;font-size:clamp(18px,3vw,24px)}
+.turn .dot{width:22px;height:22px;border-radius:7px;background:var(--c,var(--sun));box-shadow:inset 0 -3px 0 rgba(0,0,0,.2);flex:none}
+.turn small{margin-left:auto;font-size:14px;color:var(--muted);font-weight:800;text-align:right}
+.streak{display:flex;gap:6px;align-items:center;justify-content:center;font-weight:800;color:var(--muted);font-size:14px;min-height:22px}
+.streak i{width:16px;height:16px;border-radius:5px;background:rgba(43,35,64,.1);display:block}
+.streak i.on{background:var(--sun);box-shadow:0 0 10px var(--sun)}
+.q{background:#fff;border-radius:24px;box-shadow:0 2px 0 rgba(43,35,64,.1);display:grid;align-content:center;justify-items:center;gap:10px;padding:14px;min-height:0;position:relative;overflow:hidden}
+.q .say{position:absolute;right:10px;top:10px;min-height:40px;padding:8px 10px}
+.qtext{font-weight:900;font-size:clamp(40px,8vw,76px);letter-spacing:-.02em;line-height:1;text-align:center;font-variant-numeric:tabular-nums}
+.qtext .op{color:var(--grape);padding:0 .12em}
+.qtext .blank{display:inline-block;min-width:1.3em;border-bottom:6px solid var(--sun);color:var(--grape)}
+.dots{display:flex;gap:16px;align-items:center;justify-content:center;flex-wrap:wrap}
+.dots .grp{display:grid;grid-template-columns:repeat(5,18px);gap:5px}
+.dots .grp i{width:18px;height:18px;border-radius:50%;background:var(--coral);display:block}
+.dots .grp.b i{background:var(--aqua)}
+.dots .plus{font-weight:900;font-size:24px;color:var(--muted)}
+.fb{font-weight:900;font-size:clamp(18px,3vw,24px);min-height:1.3em;text-align:center}
+.fb.good{color:#16907F}.fb.bad{color:#C2413E}
+.ans{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.ans button{border:0;border-radius:20px;background:#fff;font-weight:900;font-size:clamp(30px,6vw,46px);min-height:clamp(72px,12vh,110px);box-shadow:inset 0 -6px 0 rgba(43,35,64,.12),0 2px 0 rgba(43,35,64,.1);font-variant-numeric:tabular-nums}
+.ans button:hover{background:#FFFBF2}
+.ans button:active{transform:translateY(3px);box-shadow:inset 0 -2px 0 rgba(43,35,64,.12)}
+.ans button.right{background:#BDF2E6}
+.ans button.wrong{background:#FFD0CF}
+.ans button:disabled{cursor:default}
+.hint{font-size:13px;color:var(--muted);font-weight:700;text-align:center}
+/* sheets */
+.modal{position:fixed;inset:0;z-index:20;background:rgba(43,35,64,.45);display:grid;place-items:center;padding:16px;overflow:auto}
+.modal[hidden]{display:none}
+.sheet{background:var(--cream);border-radius:26px;padding:20px;width:min(560px,100%);display:grid;gap:14px;box-shadow:0 20px 50px rgba(43,35,64,.3)}
+.sheet h2{margin:0;font-size:clamp(24px,6vw,30px);font-weight:900;letter-spacing:-.02em}
+.sheet p{margin:0;color:var(--muted);font-weight:600}
+.sheet h3{margin:4px 0 0;font-size:15px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px}
+.opt{border:0;border-radius:16px;background:#fff;padding:10px;font-weight:900;font-size:16px;box-shadow:0 2px 0 rgba(43,35,64,.12);display:grid;gap:2px;justify-items:center;min-height:58px;text-align:center}
+.opt small{font-weight:700;font-size:13px;color:var(--muted)}
+.opt[aria-pressed="true"]{background:var(--sun)}
+.opt[aria-pressed="true"] small{color:var(--ink)}
+.pl{display:grid;gap:8px;background:#fff;border-radius:18px;padding:12px;border:3px solid var(--c)}
+.pl.p0{--c:var(--p0)}.pl.p1{--c:var(--p1)}
+.pl[hidden]{display:none}
+.pl input{font:inherit;font-weight:800;font-size:18px;border:3px solid rgba(43,35,64,.12);border-radius:14px;padding:8px 12px;background:var(--cream);color:var(--ink);width:100%;user-select:text;-webkit-user-select:text}
+.pl input:focus{outline:none;border-color:var(--c)}
+.lv{display:flex;flex-wrap:wrap;gap:6px}
+.lv button{border:0;border-radius:999px;padding:8px 12px;background:var(--cream);font-weight:800;font-size:14px;min-height:40px}
+.lv button[aria-pressed="true"]{background:var(--c);color:#fff}
+.go{font-size:22px;min-height:58px;justify-content:center;border-radius:999px}
+.res{display:grid;gap:6px}
+.res div{display:flex;justify-content:space-between;gap:10px;background:#fff;border-radius:14px;padding:10px 14px;font-weight:800;font-size:17px}
+.acts{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+@media (max-width:760px){
+  main{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(150px,34vh) minmax(0,1fr)}
+  .panel{gap:8px}
+  .q{gap:6px;padding:10px}
+  .ans button{min-height:64px}
+  .dots .grp{grid-template-columns:repeat(5,14px);gap:4px}
+  .dots .grp i{width:14px;height:14px}
+}
+@media (max-width:520px){header .btn.hub span{display:none}.turn small{display:none}}
+@media (prefers-reduced-motion:reduce){#world,.blk{transition:none}.blk.wob{animation:none}}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+  <a class="btn hub" href="https://nikhilharsh.com" aria-label="Back to the family hub">🏡<span> Family hub</span></a>
+  <h1>Sky <span>Tower</span></h1>
+  <button class="btn" id="mute" aria-label="Sound on or off">🔊</button>
+  <button class="btn sun" id="newBtn">New tower</button>
+</header>
+<main>
+  <div class="scene" id="scene" aria-hidden="true">
+    <svg id="sky" preserveAspectRatio="xMidYMax slice"><g id="world"><g id="deco"></g><g id="blocks"></g><g id="topper"></g></g></svg>
+    <div class="height"><b id="hNum">0</b> blocks</div>
+    <div class="goal" id="goalTag"></div>
+  </div>
+  <div class="panel">
+    <div class="turn" id="turn"><span class="dot"></span><span id="turnName"></span><small id="turnLv"></small></div>
+    <div class="streak" id="streak" aria-label="Team streak"></div>
+    <div class="q" id="q" aria-live="polite">
+      <button class="btn say" id="say" aria-label="Read it to me">🗣️</button>
+      <div class="qtext" id="qtext"></div>
+      <div class="dots" id="dots"></div>
+      <div class="fb" id="fb"></div>
+    </div>
+    <div>
+      <div class="ans" id="ans"></div>
+      <div class="hint" id="hint">Tap an answer, or type it.</div>
+    </div>
+  </div>
+</main>
+</div>
+
+<div class="modal" id="setup" hidden>
+  <div class="sheet" role="dialog" aria-labelledby="setupT">
+    <h2 id="setupT">Build a tower together</h2>
+    <p>Take turns answering. Every right answer stacks a block. Five in a row makes a gold block.</p>
+    <h3>Who's building</h3>
+    <div class="opts" id="count">
+      <button class="opt" data-n="1">🙋 Just me</button>
+      <button class="opt" data-n="2">👫 Two of us</button>
+    </div>
+    <div class="pl p0" id="pl0"><input id="n0" maxlength="14" autocomplete="off" spellcheck="false" aria-label="Builder 1 name"><div class="lv" data-p="0"></div></div>
+    <div class="pl p1" id="pl1"><input id="n1" maxlength="14" autocomplete="off" spellcheck="false" aria-label="Builder 2 name"><div class="lv" data-p="1"></div></div>
+    <h3>How tall</h3>
+    <div class="opts" id="goals">
+      <button class="opt" data-g="10">🌳 Treetops<small>10 blocks</small></button>
+      <button class="opt" data-g="20">☁️ Clouds<small>20 blocks</small></button>
+      <button class="opt" data-g="35">🌙 The moon<small>35 blocks</small></button>
+    </div>
+    <button class="btn pri go" id="start">Start building</button>
+  </div>
+</div>
+
+<div class="modal" id="end" hidden>
+  <div class="sheet" role="dialog" aria-labelledby="endT">
+    <h2 id="endT" style="text-align:center"></h2>
+    <p id="endSub" style="text-align:center"></p>
+    <div class="res" id="endRes"></div>
+    <div class="acts"><button class="btn pri go" id="again">Build again</button><button class="btn go" id="change">Change</button></div>
+  </div>
+</div>
+
+<script>
+(function(){
+'use strict';
+// ---------- levels: each builder picks their own ----------
+var LEVELS = [
+  {id:'add10', name:'Add to 10', short:'+ to 10'},
+  {id:'pm20', name:'Add and take away to 20', short:'± to 20'},
+  {id:'big', name:'Bigger numbers', short:'to 100'},
+  {id:'x2510', name:'Times 2, 5 and 10', short:'× 2 5 10'},
+  {id:'xall', name:'All times tables', short:'× ÷ all'}
+];
+function rnd(a, b){ return a + Math.floor(Math.random()*(b - a + 1)); }
+function make(lv){
+  var a, b, op, ans, missing = false;
+  if(lv === 'add10'){ a = rnd(0, 9); b = rnd(1, 10 - a); op = '+'; ans = a + b; if(a === 0) a = rnd(1, 4), b = rnd(1, 5), ans = a + b; }
+  else if(lv === 'pm20'){
+    if(Math.random() < .5){ a = rnd(2, 15); b = rnd(1, 20 - a); op = '+'; ans = a + b; }
+    else { a = rnd(5, 20); b = rnd(1, a - 1); op = '−'; ans = a - b; }
+    if(Math.random() < .2 && op === '+') missing = true;
+  }
+  else if(lv === 'big'){
+    var k = rnd(0, 3);
+    if(k === 0){ a = rnd(11, 89); b = rnd(1, 9); if(a % 10 + b > 9 && Math.random() < .5) b = 9 - a % 10 || 1; op = '+'; ans = a + b; }
+    else if(k === 1){ a = rnd(1, 8)*10; b = rnd(1, 9 - a/10)*10; op = '+'; ans = a + b; }
+    else if(k === 2){ a = rnd(3, 9)*10 + rnd(0, 9); b = rnd(1, Math.floor(a/10) - 1)*10; op = '−'; ans = a - b; }
+    else { a = rnd(21, 99); b = rnd(1, 9); if(a % 10 < b && Math.random() < .5) b = a % 10 || 1; op = '−'; ans = a - b; }
+  }
+  else if(lv === 'x2510'){ a = [2, 5, 10][rnd(0, 2)]; b = rnd(1, 10); if(Math.random() < .5){ var t = a; a = b; b = t; } op = '×'; ans = a*b; }
+  else {
+    a = rnd(2, 10); b = rnd(2, 10);
+    if(Math.random() < .25){ op = '÷'; ans = b; a = a*b; b = a/ans; }
+    else { op = '×'; ans = a*b; }
+  }
+  // "4 + ? = 9": the answer is the missing number
+  if(missing) return {a:a, b:b, op:op, ans:b, total:a + b, missing:true, lv:lv};
+  return {a:a, b:b, op:op, ans:ans, missing:false, lv:lv};
+}
+function choices(q){
+  var set = {}, out = [q.ans], tries = 0;
+  set[q.ans] = 1;
+  var spread = q.ans < 10 ? [1, 2, 3] : q.lv === 'big' ? [1, 10, 2, 9, 11] : q.op === '×' ? [q.a, q.b, 1, 2] : [1, 2, 3, 10];
+  while(out.length < 3 && tries++ < 60){
+    var d = spread[rnd(0, spread.length - 1)]*(Math.random() < .5 ? -1 : 1), v = q.ans + d;
+    if(v < 0 || set[v]) continue; set[v] = 1; out.push(v);
+  }
+  for(var x = 1; out.length < 3; x++) if(!set[q.ans + x]){ set[q.ans + x] = 1; out.push(q.ans + x); }
+  for(var i = out.length - 1; i > 0; i--){ var j = rnd(0, i), t = out[i]; out[i] = out[j]; out[j] = t; }
+  return out;
+}
+var WORD = {'+':'plus', '−':'minus', '×':'times', '÷':'divided by'};
+function spoken(q){ return q.missing ? q.a + ' plus what makes ' + q.total + '?' : q.a + ' ' + WORD[q.op] + ' ' + q.b + '?'; }
+function sentence(q){ return q.missing ? q.a + ' + ' + q.b + ' = ' + q.total : q.a + ' ' + q.op + ' ' + q.b + ' = ' + q.ans; }
+
+// ---------- storage (this device only) ----------
+var KEY = 'tower.v1', store = {};
+try { store = JSON.parse(localStorage.getItem(KEY)) || {}; } catch(e){ store = {}; }
+store.n = store.n || 2;
+store.names = store.names || ['Builder 1', 'Builder 2'];
+store.lv = store.lv || ['add10', 'pm20'];
+store.goal = store.goal || 20;
+store.best = store.best || 0;
+store.mute = !!store.mute;
+function save(){ try { localStorage.setItem(KEY, JSON.stringify(store)); } catch(e){} }
+
+// ---------- sound ----------
+var AC = null;
+function tone(f, t, len, type, vol){
+  if(store.mute) return;
+  try {
+    AC = AC || new (window.AudioContext || window.webkitAudioContext)();
+    var o = AC.createOscillator(), g = AC.createGain(), at = AC.currentTime + (t || 0);
+    o.type = type || 'sine'; o.frequency.setValueAtTime(f, at);
+    g.gain.setValueAtTime(0, at); g.gain.linearRampToValueAtTime(vol || .12, at + .01); g.gain.exponentialRampToValueAtTime(.001, at + (len || .15));
+    o.connect(g); g.connect(AC.destination); o.start(at); o.stop(at + (len || .15) + .02);
+  } catch(e){}
+}
+var sfx = {
+  thud: function(){ tone(140, .45, .18, 'triangle', .2); tone(520, .45, .08, 'sine', .08); },
+  right: function(){ tone(660, 0, .1); tone(990, .08, .16); },
+  gold: function(){ [784, 988, 1175, 1568].forEach(function(f, i){ tone(f, i*.08, .2, 'triangle', .1); }); },
+  wrong: function(){ tone(300, 0, .15, 'triangle', .1); tone(240, .12, .2, 'triangle', .1); },
+  win: function(){ [523, 659, 784, 1047, 784, 1047, 1319].forEach(function(f, i){ tone(f, i*.14, .22, 'square', .06); }); }
+};
+var muteBtn = document.getElementById('mute');
+function showMute(){ muteBtn.textContent = store.mute ? '🔇' : '🔊'; muteBtn.setAttribute('aria-pressed', String(!store.mute)); }
+muteBtn.onclick = function(){ store.mute = !store.mute; save(); showMute(); if(store.mute && window.speechSynthesis) speechSynthesis.cancel(); };
+showMute();
+function speak(text){
+  if(store.mute || !window.speechSynthesis) return;
+  try { speechSynthesis.cancel(); var u = new SpeechSynthesisUtterance(text); u.rate = .9; u.pitch = 1.1; speechSynthesis.speak(u); } catch(e){}
+}
+
+// ---------- the sky scene (SVG, world units: one block is 36 high, ground at y=0) ----------
+var NS = 'http://www.w3.org/2000/svg', BH = 36, BW = 112, CX = 150;
+var svg = document.getElementById('sky'), world = document.getElementById('world'), blocksG = document.getElementById('blocks'), deco = document.getElementById('deco'), topper = document.getElementById('topper');
+var VB = {w:300, h:400};
+function el(tag, attrs, parent){ var e = document.createElementNS(NS, tag); for(var k in attrs) e.setAttribute(k, attrs[k]); if(parent) parent.appendChild(e); return e; }
+function mix(c1, c2, t){
+  var a = parseInt(c1.slice(1), 16), b = parseInt(c2.slice(1), 16);
+  var r = Math.round((a >> 16)*(1 - t) + (b >> 16)*t), g = Math.round((a >> 8 & 255)*(1 - t) + (b >> 8 & 255)*t), bl = Math.round((a & 255)*(1 - t) + (b & 255)*t);
+  return '#' + ((1 << 24) + (r << 16) + (g << 8) + bl).toString(16).slice(1);
+}
+// sky color by height in blocks
+var BANDS = [[0, '#A8E0FF'], [12, '#7CC8FF'], [22, '#5A8CE8'], [28, '#3B3F9E'], [33, '#151536'], [60, '#0B0B24']];
+function skyAt(h){
+  for(var i = 1; i < BANDS.length; i++) if(h <= BANDS[i][0]){ var a = BANDS[i - 1], b = BANDS[i]; return mix(a[1], b[1], (h - a[0])/(b[0] - a[0])); }
+  return BANDS[BANDS.length - 1][1];
+}
+function cloud(x, y, s, parent){
+  var g = el('g', {transform:'translate(' + x + ' ' + y + ') scale(' + s + ')', fill:'#fff', opacity:'.95'}, parent);
+  el('ellipse', {cx:0, cy:0, rx:34, ry:14}, g); el('circle', {cx:-12, cy:-10, r:14}, g); el('circle', {cx:10, cy:-14, r:17}, g); el('circle', {cx:26, cy:-4, r:11}, g);
+}
+function tree(x, s, c, parent){
+  var g = el('g', {transform:'translate(' + x + ' 0) scale(' + s + ')'}, parent);
+  el('rect', {x:-7, y:-60, width:14, height:60, rx:4, fill:'#8A5A3B'}, g);
+  el('circle', {cx:0, cy:-78, r:34, fill:c}, g); el('circle', {cx:-22, cy:-58, r:22, fill:c}, g); el('circle', {cx:22, cy:-60, r:24, fill:c}, g);
+  el('circle', {cx:-10, cy:-88, r:9, fill:'#fff', opacity:'.18'}, g);
+}
+function bird(x, y, parent){ el('path', {d:'M' + (x - 9) + ' ' + y + 'q5 -6 9 0q4 -6 9 0', fill:'none', stroke:'#2B2340', 'stroke-width':'2.5', 'stroke-linecap':'round'}, parent); }
+function star(x, y, r, parent){ var d = ''; for(var k = 0; k < 10; k++){ var a = -Math.PI/2 + k*Math.PI/5, rr = k % 2 ? r*.45 : r; d += (k ? 'L' : 'M') + (x + Math.cos(a)*rr).toFixed(1) + ' ' + (y + Math.sin(a)*rr).toFixed(1); } el('path', {d:d + 'Z', fill:'#FFF3A6'}, parent); }
+function buildScene(goal){
+  deco.innerHTML = '';
+  var top = Math.max(goal + 8, 42), H = top*BH;
+  // sky bands as stacked strips (no gradients needed)
+  for(var h = -2; h < top; h += .5) el('rect', {x:-400, y:-(h + .5)*BH - 1, width:1100, height:BH/2 + 2, fill:skyAt(h)}, deco);
+  // stars up high
+  var seed = 7; function r(){ seed = (seed*9301 + 49297) % 233280; return seed/233280; }
+  for(var i = 0; i < 90; i++){ var sh = 27 + r()*(top - 27); el('circle', {cx:-150 + r()*600, cy:-sh*BH, r:r() < .2 ? 2.2 : 1.3, fill:'#fff', opacity:(.4 + .6*Math.min(1, (sh - 27)/6)).toFixed(2)}, deco); }
+  for(var j = 0; j < 6; j++) star(-120 + r()*540, -(31 + r()*(top - 31))*BH, 6 + r()*4, deco);
+  // moon at the top, planet on the way
+  var mg = el('g', {transform:'translate(' + (CX + 70) + ' ' + (-(Math.max(goal, 35) + 3)*BH) + ')'}, deco);
+  el('circle', {cx:0, cy:0, r:46, fill:'#FFF6D6'}, mg); el('circle', {cx:-14, cy:-12, r:9, fill:'#EEE2B5'}, mg); el('circle', {cx:16, cy:10, r:12, fill:'#EEE2B5'}, mg); el('circle', {cx:8, cy:-22, r:5, fill:'#EEE2B5'}, mg);
+  var pg = el('g', {transform:'translate(' + (CX - 120) + ' ' + (-30*BH) + ')'}, deco);
+  el('circle', {cx:0, cy:0, r:22, fill:'#FF9A6B'}, pg); el('ellipse', {cx:0, cy:0, rx:38, ry:8, fill:'none', stroke:'#FFD6A6', 'stroke-width':'4'}, pg);
+  // clouds, birds, a balloon and a kite in the middle sky
+  [[CX - 140, 9, 1], [CX + 120, 12, .8], [CX - 110, 16, 1.2], [CX + 140, 18, 1], [CX - 150, 21, .9], [CX + 110, 24, .7]].forEach(function(c){ cloud(c[0], -c[1]*BH, c[2], deco); });
+  [[CX - 110, 6.5], [CX - 92, 7.2], [CX + 104, 13.5], [CX + 120, 14]].forEach(function(b){ bird(b[0], -b[1]*BH, deco); });
+  var bl = el('g', {transform:'translate(' + (CX + 118) + ' ' + (-20*BH) + ')'}, deco);
+  el('path', {d:'M0 -30C18 -30 22 -12 14 2L6 12H-6L-14 2C-22 -12 -18 -30 0 -30Z', fill:'#FF6FB5'}, bl); el('path', {d:'M0 -30C6 -22 6 0 2 12H-2C-6 0 -6 -22 0 -30Z', fill:'#FFD23F'}, bl);
+  el('path', {d:'M-6 12L-5 22M6 12L5 22', stroke:'#8A5A3B', 'stroke-width':'2'}, bl); el('rect', {x:-7, y:22, width:14, height:10, rx:2, fill:'#B07A4F'}, bl);
+  var kt = el('g', {transform:'translate(' + (CX - 120) + ' ' + (-12*BH) + ')'}, deco);
+  el('path', {d:'M0 -22L14 0L0 22L-14 0Z', fill:'#8E5CF7'}, kt); el('path', {d:'M0 -22L0 22M-14 0H14', stroke:'#fff', 'stroke-width':'2'}, kt);
+  el('path', {d:'M0 22q-6 10 2 18q8 8 0 18', fill:'none', stroke:'#2B2340', 'stroke-width':'2'}, kt);
+  // hills and ground
+  el('ellipse', {cx:CX - 170, cy:10, rx:150, ry:70, fill:'#8FD16A'}, deco);
+  el('ellipse', {cx:CX + 190, cy:14, rx:170, ry:80, fill:'#7CC65A'}, deco);
+  tree(CX - 118, .9, '#4FAE4A', deco); tree(CX + 112, 1.1, '#3E9E44', deco); tree(CX - 60, .6, '#5DBB55', deco);
+  el('rect', {x:-400, y:0, width:1100, height:400, fill:'#6DBE4E'}, deco);
+  el('rect', {x:-400, y:10, width:1100, height:400, fill:'#8B5E3C'}, deco);
+  for(var k = 0; k < 30; k++) el('circle', {cx:-300 + k*31 + (k % 3)*7, cy:28 + (k % 4)*14, r:3 + k % 3, fill:'#6E4A2E'}, deco);
+  // the goal line
+  var gl = el('g', {transform:'translate(0 ' + (-goal*BH) + ')'}, deco);
+  el('path', {d:'M-400 0H700', stroke:'#fff', 'stroke-width':'3', 'stroke-dasharray':'10 8', opacity:'.8'}, gl);
+  return H;
+}
+// one tower block: a rounded box in the builder's color with a window, gold blocks shine
+var PCOL = [['#FF5E5B', '#C93F3D'], ['#2EC4B6', '#1E8F85'], ['#FFC93C', '#D9971A']];
+function blockShape(i, who, gold){
+  var x = CX - BW/2 + Math.round(Math.sin(i*2.3)*5), y = -(i + 1)*BH;
+  var c = gold ? ['#FFD23F', '#E0A21A'] : PCOL[who] || PCOL[2];
+  var g = el('g', {'class':'blk'});
+  var inner = el('g', {}, g);
+  el('rect', {x:x, y:y, width:BW, height:BH, rx:7, fill:c[1]}, inner);
+  el('rect', {x:x, y:y, width:BW, height:BH - 6, rx:7, fill:c[0]}, inner);
+  el('rect', {x:x + 6, y:y + 4, width:BW - 12, height:4, rx:2, fill:'#fff', opacity:'.35'}, inner);
+  if(gold){ star(x + BW/2, y + BH/2 - 3, 10, inner); }
+  else {
+    var wx = x + 14 + (i*37 % 3)*28;
+    el('rect', {x:wx, y:y + 10, width:22, height:14, rx:4, fill:'#FFF6D6', stroke:'#2B2340', 'stroke-width':'2.5'}, inner);
+    el('path', {d:'M' + (wx + 11) + ' ' + (y + 10) + 'V' + (y + 24), stroke:'#2B2340', 'stroke-width':'2'}, inner);
+    el('rect', {x:x + BW - 30, y:y + 12, width:14, height:12, rx:3, fill:'rgba(0,0,0,.15)'}, inner);
+  }
+  el('rect', {x:x, y:y, width:BW, height:BH, rx:7, fill:'none', stroke:'#2B2340', 'stroke-width':'3'}, inner);
+  return g;
+}
+// a little critter flag-bearer sits on top of the tower
+function drawTopper(h){
+  topper.innerHTML = '';
+  var y = -h*BH, g = el('g', {transform:'translate(' + (CX + 24) + ' ' + y + ')'}, topper);
+  el('path', {d:'M-30 0V-54', stroke:'#2B2340', 'stroke-width':'3', 'stroke-linecap':'round'}, g);
+  el('path', {d:'M-30 -54L-2 -46L-30 -38Z', fill:'#FF6FB5', stroke:'#2B2340', 'stroke-width':'2.5', 'stroke-linejoin':'round'}, g);
+  el('path', {d:'M-20 -24C-12 -24 -8 -18 -8 -12V-2H-34V-12C-34 -18 -28 -24 -20 -24Z', transform:'translate(28 0)', fill:'#9B7BF7', stroke:'#2B2340', 'stroke-width':'2.5'}, g);
+  el('circle', {cx:4, cy:-14, r:2.4, fill:'#2B2340'}, g); el('circle', {cx:12, cy:-14, r:2.4, fill:'#2B2340'}, g);
+  el('path', {d:'M2 -28L-2 -36M14 -28L18 -36', stroke:'#2B2340', 'stroke-width':'2.5', 'stroke-linecap':'round'}, g);
+  el('circle', {cx:-2, cy:-37, r:3, fill:'#FFD23F', stroke:'#2B2340', 'stroke-width':'1.5'}, g); el('circle', {cx:18, cy:-37, r:3, fill:'#FFD23F', stroke:'#2B2340', 'stroke-width':'1.5'}, g);
+}
+function fitView(){
+  var r = svg.getBoundingClientRect(); if(!r.width) return;
+  VB.w = 300; VB.h = Math.max(200, 300*r.height/r.width);
+  // the bottom of the view sits a little below the ground so the grass and soil show
+  svg.setAttribute('viewBox', '0 ' + (-VB.h + 44) + ' ' + VB.w + ' ' + VB.h);
+  camera(false);
+}
+function camera(anim){
+  if(!G) return;
+  // keep the top of the tower about a third of the way down the view, never below the ground
+  var topY = -(G.h + 1.6)*BH, want = Math.max(0, -topY - (VB.h - 44)*.62);
+  world.style.transition = anim === false ? 'none' : '';
+  world.style.transform = 'translateY(' + want + 'px)';
+  svg.style.background = skyAt(G.h + 3);
+}
+addEventListener('resize', fitView);
+
+// ---------- game ----------
+var G = null, ansBox = document.getElementById('ans'), buf = '';
+function newGame(){
+  G = {h:0, goal:store.goal, turn:0, streak:0, right:[0, 0], tries:[0, 0], gold:0, retry:[[], []], lock:false, q:null};
+  blocksG.innerHTML = ''; buildScene(G.goal); drawTopper(0);
+  document.getElementById('goalTag').textContent = {10:'🌳 Treetops', 20:'☁️ Clouds', 35:'🌙 The moon'}[G.goal] || G.goal + ' blocks';
+  document.getElementById('hNum').textContent = 0;
+  fitView(); drawStreak(); ask();
+}
+function players(){ return store.n === 2 ? 2 : 1; }
+function ask(){
+  var p = G.turn, lv = store.lv[p];
+  // a missed question comes back two turns later
+  var q = null, rq = G.retry[p];
+  if(rq.length && rq[0].due <= G.tries[p]){ q = rq.shift().q; }
+  G.q = q || make(lv); G.choices = choices(G.q); G.lock = false; buf = '';
+  var nm = store.names[p], c = PCOL[p][0];
+  var turn = document.getElementById('turn'); turn.style.setProperty('--c', c);
+  document.getElementById('turnName').textContent = players() === 2 ? nm + "'s turn" : nm;
+  document.getElementById('turnLv').textContent = LEVELS.filter(function(l){ return l.id === lv; })[0].name;
+  var t = G.q, html;
+  if(t.missing) html = t.a + '<span class="op">+</span><span class="blank">?</span><span class="op">=</span>' + t.total;
+  else html = t.a + '<span class="op">' + t.op + '</span>' + t.b + '<span class="op">=</span><span class="blank">?</span>';
+  document.getElementById('qtext').innerHTML = html;
+  document.getElementById('qtext').setAttribute('aria-label', spoken(t));
+  // counting dots for the youngest level
+  var dots = document.getElementById('dots'); dots.innerHTML = '';
+  if(lv === 'add10' && !t.missing){
+    dots.innerHTML = '<div class="grp">' + rep('<i></i>', t.a) + '</div><span class="plus">+</span><div class="grp b">' + rep('<i></i>', t.b) + '</div>';
+  }
+  var fb = document.getElementById('fb'); fb.textContent = ''; fb.className = 'fb';
+  ansBox.innerHTML = G.choices.map(function(v){ return '<button data-v="' + v + '">' + v + '</button>'; }).join('');
+  document.getElementById('hint').textContent = 'Tap an answer, or type it.';
+}
+function rep(s, n){ var o = ''; for(var i = 0; i < n; i++) o += s; return o; }
+function pick(v){
+  if(G.lock) return; G.lock = true;
+  var p = G.turn, ok = v === G.q.ans, btns = ansBox.querySelectorAll('button');
+  G.tries[p]++;
+  btns.forEach(function(b){ b.disabled = true; if(+b.dataset.v === G.q.ans) b.classList.add('right'); else if(+b.dataset.v === v) b.classList.add('wrong'); });
+  var fb = document.getElementById('fb'), t = G.q, full = sentence(t);
+  if(ok){
+    G.right[p]++; G.streak++;
+    var gold = G.streak % 5 === 0;
+    fb.textContent = gold ? 'Gold block! ' + G.streak + ' in a row!' : ['Yes!', 'Right!', 'Nice!', 'You got it!', 'Great!'][rnd(0, 4)];
+    fb.className = 'fb good';
+    if(gold){ G.gold++; sfx.gold(); } else sfx.right();
+    addBlock(p, gold);
+  } else {
+    G.streak = 0; sfx.wrong();
+    fb.textContent = full; fb.className = 'fb bad';
+    G.retry[p].push({q:t, due:G.tries[p] + 2});
+    var tb = blocksG.lastChild; if(tb){ tb.classList.remove('wob'); void tb.getBBox(); tb.classList.add('wob'); }
+  }
+  drawStreak();
+  setTimeout(next, ok ? 1100 : 2200);
+}
+function addBlock(p, gold){
+  var b = blockShape(G.h, p, gold); b.classList.add('new');
+  blocksG.appendChild(b);
+  G.h++;
+  document.getElementById('hNum').textContent = G.h;
+  requestAnimationFrame(function(){ requestAnimationFrame(function(){ b.classList.remove('new'); }); });
+  sfx.thud(); drawTopper(G.h); camera(true);
+}
+function next(){
+  if(G.h >= G.goal) return finish();
+  if(players() === 2) G.turn = 1 - G.turn;
+  ask();
+}
+function drawStreak(){
+  var s = G.streak % 5, html = '<span>Gold block in</span>';
+  for(var i = 0; i < 5; i++) html += '<i class="' + (i < s ? 'on' : '') + '"></i>';
+  document.getElementById('streak').innerHTML = html;
+}
+function finish(){
+  sfx.win();
+  var place = {10:'the treetops', 20:'the clouds', 35:'the moon'}[G.goal] || G.goal + ' blocks';
+  if(G.h > store.best){ store.best = G.h; save(); }
+  document.getElementById('endT').textContent = 'You reached ' + place + '!';
+  document.getElementById('endSub').textContent = players() === 2 ? 'Built together, block by block.' : 'Every block was yours.';
+  var res = '';
+  for(var p = 0; p < players(); p++) res += '<div><span>' + esc(store.names[p]) + '</span><span>' + G.right[p] + ' right out of ' + G.tries[p] + '</span></div>';
+  res += '<div><span>Gold blocks</span><span>' + G.gold + '</span></div>';
+  document.getElementById('endRes').innerHTML = res;
+  speak('You reached ' + place + '!');
+  document.getElementById('end').hidden = false; document.getElementById('again').focus();
+}
+function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+ansBox.onclick = function(e){ var b = e.target.closest('button'); if(b) pick(+b.dataset.v); };
+document.getElementById('say').onclick = function(){ if(G && G.q) speak(spoken(G.q)); };
+// typing an answer: digits build up; when they match a choice exactly (and no longer choice starts with them), that's the answer
+document.addEventListener('keydown', function(e){
+  if(!G || G.lock || !document.getElementById('setup').hidden || !document.getElementById('end').hidden) return;
+  if(e.target.tagName === 'INPUT') return;
+  if(/^[0-9]$/.test(e.key)){
+    buf += e.key;
+    var hits = G.choices.filter(function(v){ return String(v).indexOf(buf) === 0; });
+    if(!hits.length){ buf = e.key; hits = G.choices.filter(function(v){ return String(v).indexOf(buf) === 0; }); if(!hits.length){ buf = ''; } }
+    document.getElementById('hint').textContent = buf ? 'You typed ' + buf : 'Tap an answer, or type it.';
+    var exact = G.choices.filter(function(v){ return String(v) === buf; });
+    if(exact.length && hits.length === 1) pick(exact[0]);
+  } else if(e.key === 'Enter' && buf){ var ex = G.choices.filter(function(v){ return String(v) === buf; }); if(ex.length) pick(ex[0]); }
+  else if(e.key === 'Backspace'){ buf = buf.slice(0, -1); document.getElementById('hint').textContent = buf ? 'You typed ' + buf : 'Tap an answer, or type it.'; }
+});
+
+// ---------- setup ----------
+var setup = document.getElementById('setup');
+document.querySelectorAll('.lv').forEach(function(box){
+  box.innerHTML = LEVELS.map(function(l){ return '<button type="button" data-lv="' + l.id + '">' + l.name + '</button>'; }).join('');
+  box.onclick = function(e){ var b = e.target.closest('button'); if(!b) return; store.lv[+box.dataset.p] = b.dataset.lv; drawSetup(); };
+});
+function drawSetup(){
+  document.querySelectorAll('#count .opt').forEach(function(b){ b.setAttribute('aria-pressed', String(+b.dataset.n === store.n)); });
+  document.querySelectorAll('#goals .opt').forEach(function(b){ b.setAttribute('aria-pressed', String(+b.dataset.g === store.goal)); });
+  document.querySelectorAll('.lv').forEach(function(box){ var p = +box.dataset.p; box.querySelectorAll('button').forEach(function(b){ b.setAttribute('aria-pressed', String(b.dataset.lv === store.lv[p])); }); });
+  document.getElementById('pl1').hidden = store.n !== 2;
+}
+document.getElementById('count').onclick = function(e){ var b = e.target.closest('.opt'); if(!b) return; store.n = +b.dataset.n; drawSetup(); };
+document.getElementById('goals').onclick = function(e){ var b = e.target.closest('.opt'); if(!b) return; store.goal = +b.dataset.g; drawSetup(); };
+function openSetup(){
+  document.getElementById('n0').value = store.names[0]; document.getElementById('n1').value = store.names[1];
+  drawSetup(); document.getElementById('end').hidden = true; setup.hidden = false; document.getElementById('start').focus();
+}
+document.getElementById('start').onclick = function(){
+  [0, 1].forEach(function(p){ var v = document.getElementById('n' + p).value.trim(); store.names[p] = v || 'Builder ' + (p + 1); });
+  save(); setup.hidden = true; newGame();
+};
+document.addEventListener('keydown', function(e){ if(e.key === 'Enter' && !setup.hidden && e.target.tagName === 'INPUT') document.getElementById('start').click(); });
+document.getElementById('newBtn').onclick = openSetup;
+document.getElementById('again').onclick = function(){ document.getElementById('end').hidden = true; newGame(); };
+document.getElementById('change').onclick = openSetup;
+
+newGame();
+openSetup();
+})();
+</script>
+</body>
+</html>
