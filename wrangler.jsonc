@@ -1,0 +1,25 @@
+// How Cloudflare runs nikhilharsh.com. A push to main deploys it (Workers Builds).
+{
+  "name": "family-site",
+  "main": "worker/index.js",
+  "compatibility_date": "2026-11-01",
+  "assets": {
+    // the page files are this folder; .assetsignore keeps the code and settings out
+    "directory": ".",
+    "binding": "ASSETS",
+    "html_handling": "auto-trailing-slash",
+    "not_found_handling": "404-page",
+    // only these addresses run the script; everything else is a page file
+    "run_worker_first": ["/api/*", "/featured/*", "/status.json"]
+  },
+  "d1_databases": [
+    // shared database: Chess Club stats, the family art wall and backups (same one as today)
+    { "binding": "DB", "database_name": "pawsandkeys", "database_id": "9b47f2d0-68d0-4835-bcd3-534bfbb0298c" }
+  ],
+  "routes": [
+    { "pattern": "nikhilharsh.com", "custom_domain": true },
+    { "pattern": "www.nikhilharsh.com", "custom_domain": true }
+  ],
+  "workers_dev": true,
+  "preview_urls": true
+}
