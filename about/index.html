@@ -50,6 +50,7 @@ h2{font-family:var(--display);font-weight:800;font-size:26px;letter-spacing:-.02
 .co{display:flex;align-items:center;justify-content:center;height:40px}
 .co b{font-family:var(--display);font-weight:800;font-size:20px;letter-spacing:-.02em;line-height:1;color:var(--muted);white-space:nowrap}
 .co img{max-height:28px;max-width:140px;filter:brightness(0) invert(1);opacity:.85}
+.co-pair{gap:10px}.co-pair img{height:26px;max-height:none}
 @media (max-width:520px){.track{gap:40px}.co img{max-height:24px;max-width:118px}}
 @media (prefers-reduced-motion:reduce){.track{animation:none;flex-wrap:wrap;justify-content:center;width:auto}}
 footer{padding-block:28px 48px;color:var(--muted);font-size:14px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;border-top:1px solid var(--line);margin-top:24px}
@@ -81,13 +82,13 @@ footer a{color:var(--muted)}
     <section class="card" aria-labelledby="cos">
       <h2 id="cos">Companies</h2>
       <div class="companies" aria-label="Companies"><div class="track" id="logotrack">
-        <div class="co" data-logo="https://www.bigscoots.com/wp-content/uploads/2022/10/bigscoots-logo-white.svg"><b>BigScoots</b></div>
+        <div class="co" data-logo="/assets/logos/bigscoots.png"><b>BigScoots</b></div>
         <div class="co" data-logo="/assets/logos/datto.png"><b>Datto</b></div>
-        <div class="co" data-logo="https://www.invernessgraham.com/wp-content/uploads/logo-white.svg"><b>Inverness Graham</b></div>
-        <div class="co" data-logo="https://www.cytracom.com/images/cytracom-logo.svg"><b>Cytracom</b></div>
-        <div class="co" data-logo="https://www.alloy.com/static/img/logo.svg"><b>Alloy</b></div>
-        <div class="co" data-logo="https://www.bankofamerica.com/content/images/ContextualSiteGraphics/Logos/en_US/logos/colored_flagscape-v2.png"><b>Bank of America</b></div>
-        <div class="co" data-logo="https://www17.wellsfargomedia.com/assets/images/rwd/wf_logo_220x23.png"><b>Wells Fargo</b></div>
+        <div class="co" data-logo="/assets/logos/inverness-graham.png"><b>Inverness Graham</b></div>
+        <div class="co"><b>Cytracom</b></div>
+        <div class="co" data-logo="/assets/logos/alloy.png"><b>Alloy</b></div>
+        <div class="co co-pair"><img src="/assets/logos/bank-of-america.svg" alt=""><b>Bank of America</b></div>
+        <div class="co" data-logo="/assets/logos/wells-fargo.png"><b>Wells Fargo</b></div>
       </div></div>
     </section>
   </main>
