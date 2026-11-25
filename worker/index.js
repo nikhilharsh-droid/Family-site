@@ -40,11 +40,8 @@ async function route(request, env) {
       } else pages[p] = { error: r ? r.status : 'fetch failed' };
     }
     const f = await env.DB.prepare('SELECT COUNT(*) AS n FROM art WHERE featured = 1 AND deleted IS NULL').first().catch(() => null);
-    let lastBackup = null;
-    try {
-      const b = await env.DB.prepare("SELECT value FROM meta WHERE key = 'backup_last'").first();
-      if (b) { const v = JSON.parse(b.value); lastBackup = { ok: v.ok, at: v.at, changed: v.changed, error: v.error }; }
-    } catch (e) {}
+    // the nightly backup is switched off for now (its cron trigger on family-private was removed on Nov 25)
+    const lastBackup = 'off';
     let music = null;
     try {
       const m = await fetch('https://itunes.apple.com/search?term=happy&media=music&entity=song&limit=3&explicit=No&country=US', { cf: { cacheTtl: 3600, cacheEverything: true } });
