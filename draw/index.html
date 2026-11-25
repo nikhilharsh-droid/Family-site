@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>Doodle Studio</title>
+<meta name="description" content="Doodle Studio: draw, color pages, make comics and add stickers.">
 <meta name="theme-color" content="#FFF6E9">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -405,7 +406,7 @@ function stroke(a, b){
   P.lineCap = P.lineJoin = 'round';
   const w = SIZES[size];
   // the eraser rubs out paint only; the ink lines on top and the background underneath stay put
-  if(tool === 'eraser'){ P.globalCompositeOperation = 'destination-out'; P.strokeStyle = '#000'; P.lineWidth = w*2.2; }
+  if(tool === 'eraser'){ P.globalCompositeOperation = 'destination-out'; P.strokeStyle = '#000'; P.lineWidth = w*2.6; }
   else { P.strokeStyle = color; P.lineWidth = w; }
   P.beginPath(); P.moveTo(a.x, a.y); P.lineTo(b.x + .01, b.y); P.stroke(); P.restore();
 }
