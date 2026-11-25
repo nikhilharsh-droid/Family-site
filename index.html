@@ -112,6 +112,9 @@ h2{font-family:var(--display);font-weight:800;font-size:clamp(28px,4vw,40px);let
 .g1{--c:var(--coral);--bgp:linear-gradient(140deg,#FF6F6B,#FFB627)}
 .g2{--c:var(--aqua);--bgp:linear-gradient(140deg,#2EC4B6,#8E5CF7)}
 .g3{--c:var(--violet);--bgp:linear-gradient(140deg,#8E5CF7,#2EC4B6 90%)}
+.g4{--c:#FF6FB5;--bgp:linear-gradient(140deg,#FF6FB5,#FFB627)}
+.g5{--c:#59BDEB;--bgp:linear-gradient(180deg,#3B7BD9,#9ED8F5)}
+.g6{--c:#7FCB5A;--bgp:linear-gradient(140deg,#4AA247,#A6DD75)}
 .kc{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;width:62%;transform:rotate(-6deg)}
 .kc span{aspect-ratio:1;border-radius:14px;display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:clamp(20px,2.6vw,30px);color:var(--dark);background:rgba(255,255,255,.92);box-shadow:inset 0 -5px 0 rgba(0,0,0,.18),0 8px 18px rgba(0,0,0,.2)}
 .kc span.on{background:var(--marigold)}
@@ -227,6 +230,43 @@ footer a{color:var(--muted)}
           </svg>
         </div>
         <div class="gtext"><h3>Chess Club</h3><p>Play a friend or solve puzzles.</p></div>
+        <span class="go">Play <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M6 3.5v13l10-6.5z" fill="currentColor"/></svg></span>
+      </a>
+      <a class="game g4" href="/match/">
+        <div class="pic" aria-hidden="true">
+          <svg viewBox="0 0 220 170"><g stroke="#2B2340" stroke-width="5" stroke-linejoin="round">
+            <g transform="rotate(-9 70 85)"><rect x="22" y="22" width="96" height="126" rx="16" fill="#8E5CF7"/><rect x="34" y="34" width="72" height="102" rx="10" fill="none" stroke="#fff" stroke-width="4" stroke-dasharray="3 9" stroke-linecap="round"/><text x="70" y="100" text-anchor="middle" font-size="44" font-weight="900" fill="#FFD23F" stroke="none" font-family="ui-rounded,system-ui,sans-serif">?</text></g>
+            <g transform="rotate(8 150 85)"><rect x="102" y="22" width="96" height="126" rx="16" fill="#fff"/>
+              <path d="M128 70c-6-14-2-26 6-24s6 18 4 26zM172 70c6-14 2-26-6-24s-6 18-4 26z" fill="#FF6FB5"/>
+              <circle cx="150" cy="90" r="30" fill="#FF6FB5"/><circle cx="140" cy="86" r="4.5" fill="#2B2340" stroke="none"/><circle cx="160" cy="86" r="4.5" fill="#2B2340" stroke="none"/><path d="M142 100q8 7 16 0" fill="none" stroke-width="4" stroke-linecap="round"/></g>
+          </g></svg>
+        </div>
+        <div class="gtext"><h3>Critter Match</h3><p>Find the pairs. Take turns or team up.</p></div>
+        <span class="go">Play <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M6 3.5v13l10-6.5z" fill="currentColor"/></svg></span>
+      </a>
+      <a class="game g5" href="/tower/">
+        <div class="pic" aria-hidden="true">
+          <svg viewBox="0 0 220 170"><circle cx="186" cy="30" r="16" fill="#FFF3C4"/><ellipse cx="46" cy="44" rx="26" ry="10" fill="#fff" opacity=".85"/>
+            <rect x="0" y="152" width="220" height="18" fill="#7FCB5A"/>
+            <g stroke="#2B2340" stroke-width="4" stroke-linejoin="round"><rect x="74" y="126" width="72" height="26" rx="6" fill="#FF6FB5"/><rect x="80" y="100" width="72" height="26" rx="6" fill="#2EC4B6"/><rect x="70" y="74" width="72" height="26" rx="6" fill="#FFB627"/><rect x="78" y="48" width="72" height="26" rx="6" fill="#8E5CF7"/>
+            <path d="M114 48V18" stroke-linecap="round"/><path d="M114 18l24 8l-24 8z" fill="#FF5E5B"/></g>
+            <g fill="#fff" font-family="ui-rounded,system-ui,sans-serif" font-weight="900" font-size="17" text-anchor="middle"><text x="110" y="145">3+4</text><text x="116" y="119">7</text></g></svg>
+        </div>
+        <div class="gtext"><h3>Sky Tower</h3><p>Answer sums together to build up to the moon.</p></div>
+        <span class="go">Play <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M6 3.5v13l10-6.5z" fill="currentColor"/></svg></span>
+      </a>
+      <a class="game g6" href="/buddies/">
+        <div class="pic" aria-hidden="true">
+          <svg viewBox="0 0 220 170"><g stroke="#2B2340" stroke-width="4" stroke-linejoin="round">
+            <ellipse cx="70" cy="150" rx="34" ry="7" fill="rgba(0,0,0,.2)" stroke="none"/><ellipse cx="148" cy="152" rx="48" ry="8" fill="rgba(0,0,0,.2)" stroke="none"/>
+            <path d="M52 104c-8-22-4-40 4-40s12 20 10 38zM88 104c8-22 4-40-4-40s-12 20-10 38z" fill="#FF9A3C"/>
+            <circle cx="70" cy="122" r="28" fill="#FF9A3C"/><ellipse cx="70" cy="132" rx="16" ry="11" fill="#FFE3C4" stroke="none"/>
+            <circle cx="114" cy="62" r="15" fill="#8E6CF0"/><circle cx="182" cy="62" r="15" fill="#8E6CF0"/>
+            <path d="M148 50c34 0 50 24 50 52c0 30-20 46-50 46s-50-16-50-46c0-28 16-52 50-52z" fill="#8E6CF0"/>
+            <ellipse cx="148" cy="124" rx="28" ry="17" fill="#C9B8FF" stroke="none"/><ellipse cx="148" cy="104" rx="16" ry="12" fill="#E4DAFF"/></g>
+            <g fill="#2B2340"><circle cx="61" cy="117" r="4.5"/><circle cx="79" cy="117" r="4.5"/><circle cx="134" cy="88" r="5"/><circle cx="162" cy="88" r="5"/><ellipse cx="148" cy="99" rx="6" ry="4"/></g></svg>
+        </div>
+        <div class="gtext"><h3>Burrow Buddies</h3><p>Two critters, one puzzle. Help each other home.</p></div>
         <span class="go">Play <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M6 3.5v13l10-6.5z" fill="currentColor"/></svg></span>
       </a>
     </div>
