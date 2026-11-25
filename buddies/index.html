@@ -1,0 +1,510 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Burrow Buddies</title>
+<meta name="description" content="A two-player puzzle game: little Pip and big Bramble help each other get home.">
+<meta name="theme-color" content="#FFF6E9">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Buddies">
+<link rel="icon" href="/favicon.ico">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{--ink:#2B2340;--muted:#6B6485;--cream:#FFF6E9;--sun:#FFB627;--aqua:#2EC4B6;--grape:#8E5CF7;--pip:#FF9A3C;--bram:#8E6CF0}
+html,body{margin:0;height:100%;background:var(--cream);font-family:ui-rounded,"SF Pro Rounded",system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink);user-select:none;-webkit-user-select:none;overscroll-behavior:none}
+button{font:inherit;color:inherit;touch-action:manipulation;cursor:pointer}
+:focus-visible{outline:3px solid var(--grape);outline-offset:3px}
+.app{display:grid;grid-template-rows:auto auto minmax(0,1fr);height:100%;height:100dvh;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+header{display:flex;align-items:center;gap:8px;padding:10px 12px;flex-wrap:wrap}
+header h1{margin:0 auto 0 4px;font-size:clamp(19px,5vw,24px);font-weight:900;letter-spacing:-.02em;white-space:nowrap}
+header h1 span{color:var(--pip)}
+.btn{white-space:nowrap;font-weight:800;font-size:15px;border:0;border-radius:14px;padding:10px 14px;background:#fff;color:var(--ink);box-shadow:0 2px 0 rgba(43,35,64,.15);text-decoration:none;display:inline-flex;align-items:center;gap:6px;min-height:44px}
+.btn:active{transform:translateY(2px);box-shadow:none}
+.btn.pri{background:var(--aqua);color:#fff}
+.btn.sun{background:var(--sun)}
+.tools{display:flex;gap:8px}
+.info{display:flex;align-items:center;justify-content:center;gap:10px;padding:0 12px 8px;text-align:center;flex-wrap:wrap}
+.lvname{font-weight:900;font-size:18px}
+.lvname small{color:var(--muted);font-weight:800;font-size:14px;margin-right:6px}
+.tip{color:var(--muted);font-weight:700;font-size:15px}
+.moves{font-weight:800;font-size:14px;color:var(--muted);background:#fff;border-radius:999px;padding:4px 10px}
+main{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:14px;padding:0 12px 14px;min-height:0}
+.boardwrap{display:grid;place-items:center;min-height:0;height:100%}
+#board{display:block;max-width:100%;max-height:100%;border-radius:20px;background:#3A8A3A;box-shadow:0 6px 24px rgba(43,35,64,.15);touch-action:none}
+.mover{transition:transform .14s ease-out}
+.flip{transition:transform .14s}
+.nudge{animation:nudge .18s ease}
+@keyframes nudge{50%{transform:translate(var(--nx),var(--ny))}}
+.gate .bars{transition:opacity .2s,transform .2s;transform-box:fill-box;transform-origin:50% 0}
+.gate.open .bars{opacity:0;transform:scaleY(.2)}
+.plate .cap{transition:transform .12s;transform-box:fill-box}
+.plate.down .cap{transform:translateY(3px) scale(.92)}
+.stone{opacity:0;transition:opacity .25s}
+.wet .stone{opacity:1}
+.wet .wave{opacity:0}
+.home .glow{opacity:0;transition:opacity .3s}
+.home.on .glow{opacity:1}
+.hintarrow{animation:pulse .5s ease-in-out infinite alternate}
+@keyframes pulse{to{opacity:.35}}
+/* touch pads: Pip on the left, Bramble on the right, like sitting side by side */
+.pad{display:grid;grid-template-columns:repeat(3,58px);grid-template-rows:auto repeat(3,58px);gap:6px;justify-items:center;align-items:center}
+.pad .who{grid-column:1/-1;display:flex;align-items:center;gap:6px;font-weight:900;font-size:15px}
+.pad .who svg{width:34px;height:34px}
+.pad .who small{font-weight:800;color:var(--muted);font-size:12px}
+.pad button{width:58px;height:58px;border:0;border-radius:16px;background:#fff;box-shadow:inset 0 -5px 0 rgba(43,35,64,.12),0 2px 0 rgba(43,35,64,.1);display:grid;place-items:center}
+.pad button svg{width:26px;height:26px}
+.pad.pip button{color:var(--pip)}.pad.bram button{color:var(--bram)}
+.pad button:active,.pad button.on{transform:translateY(3px);box-shadow:inset 0 -2px 0 rgba(43,35,64,.12)}
+.pad button.hint{box-shadow:0 0 0 4px var(--sun),inset 0 -5px 0 rgba(43,35,64,.12)}
+.pad .u{grid-column:2;grid-row:2}.pad .l{grid-column:1;grid-row:3}.pad .d{grid-column:2;grid-row:4}.pad .r{grid-column:3;grid-row:3}
+.toast{position:fixed;left:50%;top:18%;transform:translate(-50%,-10px);background:var(--ink);color:#fff;font-weight:900;font-size:clamp(18px,4.5vw,26px);padding:12px 22px;border-radius:18px;opacity:0;transition:opacity .2s,transform .2s;pointer-events:none;z-index:30;max-width:90vw;text-align:center}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+.modal{position:fixed;inset:0;z-index:20;background:rgba(43,35,64,.45);display:grid;place-items:center;padding:16px;overflow:auto}
+.modal[hidden]{display:none}
+.sheet{background:var(--cream);border-radius:26px;padding:20px;width:min(560px,100%);display:grid;gap:14px;box-shadow:0 20px 50px rgba(43,35,64,.3)}
+.sheet h2{margin:0;font-size:clamp(24px,6vw,30px);font-weight:900;letter-spacing:-.02em}
+.sheet p{margin:0;color:var(--muted);font-weight:600}
+.levels{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px}
+.levels button{border:0;border-radius:16px;background:#fff;padding:10px 6px;display:grid;gap:2px;justify-items:center;box-shadow:0 2px 0 rgba(43,35,64,.12);min-height:84px}
+.levels b{font-size:24px;font-weight:900}
+.levels small{font-size:12px;font-weight:800;color:var(--muted);text-align:center;line-height:1.15}
+.levels .acorns{font-size:13px;letter-spacing:1px;min-height:16px}
+.levels button.cur{box-shadow:0 0 0 3px var(--sun),0 2px 0 rgba(43,35,64,.12)}
+.levels button.done{background:#E9F8E2}
+.how{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.how div{background:#fff;border-radius:16px;padding:10px 12px;font-weight:700;font-size:14px;color:var(--muted);display:flex;gap:10px;align-items:center}
+.how svg{width:40px;height:40px;flex:none}
+.how b{color:var(--ink)}
+.acts{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.go{font-size:20px;min-height:54px;justify-content:center;border-radius:999px}
+.bigacorn{text-align:center;font-size:44px;letter-spacing:6px}
+@media (max-width:860px){
+  main{grid-template-columns:1fr 1fr;grid-template-rows:minmax(0,1fr) auto;gap:10px}
+  .boardwrap{grid-column:1/-1;grid-row:1}
+  .pad.pip{grid-column:1;grid-row:2;justify-self:start}
+  .pad.bram{grid-column:2;grid-row:2;justify-self:end}
+  .pad{grid-template-columns:repeat(3,52px);grid-template-rows:auto repeat(3,52px);gap:5px}
+  .pad button{width:52px;height:52px}
+}
+@media (max-width:520px){
+  header .btn.hub span,.tools .btn span{display:none}
+  .tip{font-size:14px}
+  .how{grid-template-columns:1fr}
+  .pad{grid-template-columns:repeat(3,48px);grid-template-rows:auto repeat(3,48px)}
+  .pad button{width:48px;height:48px}
+}
+@media (prefers-reduced-motion:reduce){.mover,.flip,.gate .bars,.plate .cap{transition:none}.nudge,.hintarrow{animation:none}}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+  <a class="btn hub" href="https://nikhilharsh.com" aria-label="Back to the family hub">🏡<span> Family hub</span></a>
+  <h1>Burrow <span>Buddies</span></h1>
+  <div class="tools">
+    <button class="btn" id="undo" aria-label="Undo">↩️<span> Undo</span></button>
+    <button class="btn" id="restart" aria-label="Start the level again">🔄<span> Restart</span></button>
+    <button class="btn" id="hintBtn" aria-label="Show a hint">💡<span> Hint</span></button>
+    <button class="btn" id="mute" aria-label="Sound on or off">🔊</button>
+    <button class="btn sun" id="levelsBtn">Levels</button>
+  </div>
+</header>
+<div class="info"><span class="lvname" id="lvname"></span><span class="tip" id="tip"></span><span class="moves" id="moves">0 moves</span></div>
+<main>
+  <div class="pad pip" data-who="pip" aria-label="Pip's buttons">
+    <div class="who" id="pipFace"></div>
+    <button class="u" data-dir="up" aria-label="Pip up"></button><button class="l" data-dir="left" aria-label="Pip left"></button><button class="d" data-dir="down" aria-label="Pip down"></button><button class="r" data-dir="right" aria-label="Pip right"></button>
+  </div>
+  <div class="boardwrap"><svg id="board" role="img" aria-label="Puzzle board"></svg></div>
+  <div class="pad bram" data-who="bram" aria-label="Bramble's buttons">
+    <div class="who" id="bramFace"></div>
+    <button class="u" data-dir="up" aria-label="Bramble up"></button><button class="l" data-dir="left" aria-label="Bramble left"></button><button class="d" data-dir="down" aria-label="Bramble down"></button><button class="r" data-dir="right" aria-label="Bramble right"></button>
+  </div>
+</main>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<div class="modal" id="levels" hidden>
+  <div class="sheet" role="dialog" aria-labelledby="levelsT">
+    <h2 id="levelsT">Burrow Buddies</h2>
+    <p>Get little Pip and big Bramble home together. One player can drive both.</p>
+    <div class="how" id="how"></div>
+    <div class="levels" id="levelGrid"></div>
+    <div class="acts"><button class="btn go" id="closeLevels">Back to the puzzle</button></div>
+  </div>
+</div>
+<div class="modal" id="win" hidden>
+  <div class="sheet" role="dialog" aria-labelledby="winT">
+    <h2 id="winT" style="text-align:center">Both home!</h2>
+    <div class="bigacorn" id="winAcorns"></div>
+    <p id="winSub" style="text-align:center"></p>
+    <div class="acts"><button class="btn pri go" id="nextBtn">Next puzzle</button><button class="btn go" id="replayBtn">Play again</button></div>
+  </div>
+</div>
+
+<script>
+(function(){
+'use strict';
+// ---------- levels (each one checked solvable by a search; par = fewest moves) ----------
+var LEVELS = [
+ {name:'Hello, buddies', par:12, tip:'Pip moves with W A S D. Bramble moves with the arrow keys.', map:['#########','#p.....P#','#########','#q.....Q#','#########']},
+ {name:'Tiny tunnel', par:14, tip:'Only little Pip fits through a burrow hole.', map:['###########','#p...o...P#','#.###.###.#','#.#q.....##','#.#####.###','#......Q###','###########']},
+ {name:'Rock in the road', par:17, tip:'Only big Bramble can push a boulder.', map:['###.#####','#p.O...P#','###.#####','#q......#','#######Q#','#########']},
+ {name:'Button gate', par:12, tip:'Stand on a button to open the gate of the same color.', map:['#########','#p.o.g.P#','####.####','#q..G..Q#','#########']},
+ {name:'Splash', par:19, tip:'Push a boulder into the water to make a stepping stone.', map:['##########','#p..~...P#','####.#####','####O#####','#q.......#','#######.Q#','##########']},
+ {name:'Hold the door', par:21, tip:'A boulder can hold a button down too.', map:['###########','#p.......Q#','#####G#####','###g#.#####','###O#P#####','#q......###','###########']},
+ {name:'Your turn, my turn', par:19, tip:'Take turns holding the buttons for each other.', map:['###########','#p..h.#.P##','#.###o#G###','#q..H...gQ#','###########']},
+ {name:'Stepping stones', par:25, tip:'Two boulders, two splashes.', map:['###########','#p.~..~..P#','###.##.####','###O##O####','#q........#','#########Q#','###########']},
+ {name:'Big push', par:24, tip:'One boulder for the water, one for the button.', map:['###########','#p..~..G.P#','####.######','####O###g##','####.###O##','#q.......Q#','###########']},
+ {name:'Moat', par:23, tip:'Pip opens the way, Bramble makes a bridge.', map:['###########','#p.o.h#.Q.#','#.#####H###','#...~.O.q.#','####.######','####P######','###########']}
+];
+
+// ENGINE START
+// Tiles: # hedge, . grass, o burrow (Pip only), ~ water, O boulder, g/h buttons, G/H gates, p/q starts, P/Q homes
+var DIRS = {up:[0, -1], down:[0, 1], left:[-1, 0], right:[1, 0]};
+function parseLevel(L){
+  var rows = L.map, h = rows.length, w = Math.max.apply(null, rows.map(function(r){ return r.length; }));
+  var base = [], rocks = [], pip = -1, bram = -1;
+  for(var y = 0; y < h; y++) for(var x = 0; x < w; x++){
+    var c = rows[y][x] || '#', i = y*w + x;
+    if(c === 'p'){ pip = i; c = '.'; }
+    if(c === 'q'){ bram = i; c = '.'; }
+    if(c === 'O'){ rocks.push(i); c = '.'; }
+    base.push(c);
+  }
+  return {w:w, h:h, base:base, start:{pip:pip, bram:bram, rocks:rocks, wet:[]}};
+}
+function occupied(S, i){ return S.pip === i || S.bram === i || S.rocks.indexOf(i) >= 0; }
+function gateOpen(B, S, gate){
+  var plate = gate === 'G' ? 'g' : 'h';
+  for(var i = 0; i < B.base.length; i++) if(B.base[i] === plate && occupied(S, i)) return true;
+  return false;
+}
+function tileOpen(B, S, i){
+  var t = B.base[i];
+  if(t === '#') return false;
+  if(t === '~') return S.wet.indexOf(i) >= 0;
+  if(t === 'G' || t === 'H') return occupied(S, i) || gateOpen(B, S, t);
+  return true;
+}
+function step(B, S, who, dir){
+  var d = DIRS[dir], at = S[who], x = at % B.w + d[0], y = Math.floor(at/B.w) + d[1];
+  if(x < 0 || y < 0 || x >= B.w || y >= B.h) return null;
+  var to = y*B.w + x, t = B.base[to];
+  if(t === 'o' && who !== 'pip') return null;
+  if(!tileOpen(B, S, to)) return null;
+  var other = who === 'pip' ? 'bram' : 'pip';
+  if(S[other] === to) return null;
+  var ri = S.rocks.indexOf(to), N = {pip:S.pip, bram:S.bram, rocks:S.rocks.slice(), wet:S.wet.slice()}, pushed = null;
+  if(ri >= 0){
+    if(who !== 'bram') return null;
+    var x2 = x + d[0], y2 = y + d[1];
+    if(x2 < 0 || y2 < 0 || x2 >= B.w || y2 >= B.h) return null;
+    var to2 = y2*B.w + x2, t2 = B.base[to2];
+    if(t2 === '#' || t2 === 'o' || t2 === 'P' || t2 === 'Q') return null;
+    if(occupied(S, to2)) return null;
+    if((t2 === 'G' || t2 === 'H') && !gateOpen(B, S, t2)) return null;
+    if(t2 === '~' && S.wet.indexOf(to2) < 0){ N.rocks.splice(ri, 1); N.wet.push(to2); pushed = {from:to, to:to2, sank:true, idx:ri}; }
+    else { N.rocks[ri] = to2; pushed = {from:to, to:to2, sank:false, idx:ri}; }
+  }
+  N[who] = to;
+  N.pushed = pushed;
+  return N;
+}
+function won(B, S){ return B.base[S.pip] === 'P' && B.base[S.bram] === 'Q'; }
+function key(S){ return S.pip + ',' + S.bram + '|' + S.rocks.slice().sort(function(a, b){ return a - b; }).join(',') + '|' + S.wet.slice().sort(function(a, b){ return a - b; }).join(','); }
+function solve(B, S, opts){
+  opts = opts || {};
+  var who = ['pip', 'bram'], dirs = Object.keys(DIRS), limit = opts.limit || 200000;
+  var seen = {}, q = [{s:S, path:null}], head = 0; seen[key(S)] = 1;
+  if(won(B, S)) return [];
+  while(head < q.length && head < limit){
+    var cur = q[head++];
+    for(var a = 0; a < 2; a++) for(var b = 0; b < 4; b++){
+      var N = step(B, cur.s, who[a], dirs[b]); if(!N) continue;
+      var k = key(N); if(seen[k]) continue; seen[k] = 1;
+      var path = {who:who[a], dir:dirs[b], prev:cur.path};
+      if(won(B, N)){ var out = []; for(var p = path; p; p = p.prev) out.unshift({who:p.who, dir:p.dir}); return out; }
+      q.push({s:N, path:path});
+    }
+  }
+  return null;
+}
+// ENGINE END
+
+// ---------- art (SVG, one tile is 48 units) ----------
+var T = 48, INK = '#2B2340', PLATE = {g:['#FF6FB5', '#C94A8C'], h:['#FFD23F', '#C99A12']};
+function pipSVG(){
+  return '<ellipse cx="24" cy="40" rx="12" ry="3.5" fill="rgba(0,0,0,.18)"/>' +
+    '<path d="M14 22C10 12 12 5 16 5S22 14 21 21Z" fill="#FF9A3C" stroke="' + INK + '" stroke-width="2.4" stroke-linejoin="round"/><path d="M34 22C38 12 36 5 32 5S26 14 27 21Z" fill="#FF9A3C" stroke="' + INK + '" stroke-width="2.4" stroke-linejoin="round"/>' +
+    '<path d="M16 19.5C15 13 16 9 17 9S19.5 14 19.5 19.5Z" fill="#FFD9B0"/><path d="M32 19.5C33 13 32 9 31 9S28.5 14 28.5 19.5Z" fill="#FFD9B0"/>' +
+    '<path d="M36 34C42 34 43 28 40 26" fill="none" stroke="' + INK + '" stroke-width="2.4" stroke-linecap="round"/>' +
+    '<circle cx="24" cy="29" r="12" fill="#FF9A3C" stroke="' + INK + '" stroke-width="2.4"/>' +
+    '<ellipse cx="24" cy="33" rx="7" ry="5" fill="#FFE3C4"/>' +
+    '<circle cx="28.5" cy="26" r="2.6" fill="' + INK + '"/><circle cx="29.3" cy="25.2" r=".9" fill="#fff"/><circle cx="20" cy="26" r="2.6" fill="' + INK + '"/><circle cx="20.8" cy="25.2" r=".9" fill="#fff"/>' +
+    '<circle cx="24.5" cy="30" r="1.6" fill="#FF5E7A"/>';
+}
+function bramSVG(){
+  return '<ellipse cx="24" cy="44" rx="19" ry="4" fill="rgba(0,0,0,.2)"/>' +
+    '<circle cx="11" cy="11" r="6.5" fill="#8E6CF0" stroke="' + INK + '" stroke-width="2.6"/><circle cx="37" cy="11" r="6.5" fill="#8E6CF0" stroke="' + INK + '" stroke-width="2.6"/>' +
+    '<circle cx="11" cy="11" r="3" fill="#C9B8FF"/><circle cx="37" cy="11" r="3" fill="#C9B8FF"/>' +
+    '<path d="M24 6C38 6 44 16 44 27C44 39 36 44 24 44C12 44 4 39 4 27C4 16 10 6 24 6Z" fill="#8E6CF0" stroke="' + INK + '" stroke-width="2.6"/>' +
+    '<ellipse cx="24" cy="35" rx="12" ry="7" fill="#C9B8FF"/>' +
+    '<ellipse cx="26" cy="25" rx="8" ry="6" fill="#E4DAFF" stroke="' + INK + '" stroke-width="2"/><ellipse cx="28" cy="22.6" rx="3" ry="2" fill="' + INK + '"/>' +
+    '<path d="M25 28Q28 30.5 31 28" fill="none" stroke="' + INK + '" stroke-width="1.8" stroke-linecap="round"/>' +
+    '<circle cx="34" cy="17" r="2.8" fill="' + INK + '"/><circle cx="34.9" cy="16.2" r="1" fill="#fff"/><circle cx="17" cy="17" r="2.8" fill="' + INK + '"/><circle cx="17.9" cy="16.2" r="1" fill="#fff"/>' +
+    '<path d="M6 31C2 33 2 37 6 38M42 31C46 33 46 37 42 38" fill="#8E6CF0" stroke="' + INK + '" stroke-width="2.4" stroke-linecap="round"/>';
+}
+function rockSVG(){
+  return '<ellipse cx="24" cy="42" rx="17" ry="4" fill="rgba(0,0,0,.22)"/>' +
+    '<path d="M8 32C6 20 14 8 26 8C37 8 43 18 41 30C40 39 33 42 24 42C15 42 9 39 8 32Z" fill="#A9A3B5" stroke="' + INK + '" stroke-width="2.6"/>' +
+    '<path d="M14 22C16 15 21 12 27 12" fill="none" stroke="#D7D2E0" stroke-width="3" stroke-linecap="round"/>' +
+    '<path d="M30 30L34 26M33 36L37 33" stroke="#7E778C" stroke-width="2.2" stroke-linecap="round"/>';
+}
+function seeded(i){ var s = Math.sin(i*99.13)*43758.5; return s - Math.floor(s); }
+function grass(x, y, i){
+  var s = '<rect x="' + x + '" y="' + y + '" width="' + T + '" height="' + T + '" fill="' + ((Math.floor(i/1e3) + x/T + y/T) % 2 ? '#A6DD75' : '#9DD46B') + '"/>';
+  if(seeded(i) < .35){ var tx = x + 10 + seeded(i + 1)*24, ty = y + 14 + seeded(i + 2)*22; s += '<path d="M' + tx + ' ' + ty + 'l2 -5l2 5l2 -6l2 6" fill="none" stroke="#7FBF4F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'; }
+  return s;
+}
+function hedge(x, y, i){
+  return '<rect x="' + x + '" y="' + y + '" width="' + T + '" height="' + T + '" fill="#3A8A3A"/>' +
+    '<circle cx="' + (x + 14) + '" cy="' + (y + 16) + '" r="12" fill="#4AA247"/><circle cx="' + (x + 34) + '" cy="' + (y + 14) + '" r="11" fill="#52AD4E"/><circle cx="' + (x + 24) + '" cy="' + (y + 32) + '" r="13" fill="#46A044"/>' +
+    '<circle cx="' + (x + 10 + seeded(i)*20) + '" cy="' + (y + 12 + seeded(i + 3)*8) + '" r="3" fill="#6CC468"/>';
+}
+function tile(c, x, y, i, wx, wy){
+  var s = '';
+  if(c === '#') return hedge(x, y, i);
+  if(c === 'o') return hedge(x, y, i) + '<ellipse cx="' + (x + 24) + '" cy="' + (y + 31) + '" rx="16" ry="14" fill="#7A5230"/><ellipse cx="' + (x + 24) + '" cy="' + (y + 32) + '" rx="12.5" ry="11.5" fill="#2E2018"/><path d="M' + (x + 14) + ' ' + (y + 43) + 'H' + (x + 34) + '" stroke="#7A5230" stroke-width="3" stroke-linecap="round"/>';
+  if(c === '~') return '<g class="water" data-i="' + wx + '"><rect x="' + x + '" y="' + y + '" width="' + T + '" height="' + T + '" fill="#59BDEB"/><path class="wave" d="M' + (x + 8) + ' ' + (y + 18) + 'q5 -5 10 0t10 0t10 0M' + (x + 6) + ' ' + (y + 32) + 'q5 -5 10 0t10 0t10 0" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" opacity=".7"/>' +
+    '<g class="stone"><ellipse cx="' + (x + 24) + '" cy="' + (y + 26) + '" rx="19" ry="15" fill="#8E86A0" stroke="' + INK + '" stroke-width="2.4"/><ellipse cx="' + (x + 22) + '" cy="' + (y + 23) + '" rx="13" ry="9" fill="#A9A3B5"/></g></g>';
+  s = grass(x, y, i);
+  if(c === 'g' || c === 'h'){ var pc = PLATE[c]; s += '<g class="plate" data-i="' + wx + '"><circle cx="' + (x + 24) + '" cy="' + (y + 26) + '" r="16" fill="' + pc[1] + '" stroke="' + INK + '" stroke-width="2.4"/><g class="cap"><circle cx="' + (x + 24) + '" cy="' + (y + 23) + '" r="12" fill="' + pc[0] + '" stroke="' + INK + '" stroke-width="2.2"/><circle cx="' + (x + 20) + '" cy="' + (y + 19) + '" r="3.5" fill="#fff" opacity=".55"/></g></g>'; }
+  if(c === 'G' || c === 'H'){ var gc = PLATE[c.toLowerCase()]; s += '<g class="gate" data-i="' + wx + '"><g class="bars"><rect x="' + (x + 3) + '" y="' + (y + 10) + '" width="' + (T - 6) + '" height="8" rx="3" fill="' + gc[0] + '" stroke="' + INK + '" stroke-width="2.2"/><rect x="' + (x + 3) + '" y="' + (y + 24) + '" width="' + (T - 6) + '" height="8" rx="3" fill="' + gc[0] + '" stroke="' + INK + '" stroke-width="2.2"/><path d="M' + (x + 17) + ' ' + (y + 8) + 'V' + (y + 38) + 'M' + (x + 31) + ' ' + (y + 8) + 'V' + (y + 38) + '" stroke="' + gc[1] + '" stroke-width="4" stroke-linecap="round"/></g>' +
+    '<rect x="' + (x + 1) + '" y="' + (y + 4) + '" width="7" height="40" rx="3" fill="#A0703F" stroke="' + INK + '" stroke-width="2.2"/><rect x="' + (x + T - 8) + '" y="' + (y + 4) + '" width="7" height="40" rx="3" fill="#A0703F" stroke="' + INK + '" stroke-width="2.2"/></g>'; }
+  if(c === 'P') s += '<g class="home" data-who="pip"><circle class="glow" cx="' + (x + 24) + '" cy="' + (y + 28) + '" r="21" fill="#FFE07A" opacity=".8"/><ellipse cx="' + (x + 24) + '" cy="' + (y + 32) + '" rx="18" ry="9" fill="#A0703F" stroke="' + INK + '" stroke-width="2.4"/><ellipse cx="' + (x + 24) + '" cy="' + (y + 30) + '" rx="12" ry="5" fill="#6E4A2E"/><path d="M' + (x + 9) + ' ' + (y + 33) + 'l6 -3M' + (x + 33) + ' ' + (y + 30) + 'l6 3M' + (x + 20) + ' ' + (y + 38) + 'l8 -2" stroke="#D9A86A" stroke-width="2" stroke-linecap="round"/>' +
+    '<path d="M' + (x + 38) + ' ' + (y + 30) + 'V' + (y + 6) + '" stroke="' + INK + '" stroke-width="2.4" stroke-linecap="round"/><path d="M' + (x + 38) + ' ' + (y + 6) + 'L' + (x + 26) + ' ' + (y + 11) + 'L' + (x + 38) + ' ' + (y + 16) + 'Z" fill="#FF9A3C" stroke="' + INK + '" stroke-width="2" stroke-linejoin="round"/></g>';
+  if(c === 'Q') s += '<g class="home" data-who="bram"><circle class="glow" cx="' + (x + 24) + '" cy="' + (y + 26) + '" r="23" fill="#FFE07A" opacity=".8"/><path d="M' + (x + 4) + ' ' + (y + 44) + 'V' + (y + 24) + 'C' + (x + 4) + ' ' + (y + 6) + ' ' + (x + 44) + ' ' + (y + 6) + ' ' + (x + 44) + ' ' + (y + 24) + 'V' + (y + 44) + 'Z" fill="#8C849A" stroke="' + INK + '" stroke-width="2.4"/><path d="M' + (x + 12) + ' ' + (y + 44) + 'V' + (y + 28) + 'C' + (x + 12) + ' ' + (y + 15) + ' ' + (x + 36) + ' ' + (y + 15) + ' ' + (x + 36) + ' ' + (y + 28) + 'V' + (y + 44) + 'Z" fill="#3B3150"/>' +
+    '<path d="M' + (x + 24) + ' ' + (y + 10) + 'V' + (y - 2) + '" stroke="' + INK + '" stroke-width="2.4" stroke-linecap="round"/><path d="M' + (x + 24) + ' ' + (y - 2) + 'L' + (x + 36) + ' ' + (y + 3) + 'L' + (x + 24) + ' ' + (y + 8) + 'Z" fill="#8E6CF0" stroke="' + INK + '" stroke-width="2" stroke-linejoin="round"/></g>';
+  return s;
+}
+var ARROW = {up:'M12 4L21 15H15V21H9V15H3Z', down:'M12 20L3 9H9V3H15V9H21Z', left:'M4 12L15 3V9H21V15H15V21Z', right:'M20 12L9 21V15H3V9H9V3Z'};
+
+// ---------- state ----------
+var KEY = 'buddies.v1', store = {};
+try { store = JSON.parse(localStorage.getItem(KEY)) || {}; } catch(e){ store = {}; }
+store.best = store.best || {};
+store.cur = Math.min(store.cur || 0, LEVELS.length - 1);
+store.mute = !!store.mute;
+function save(){ try { localStorage.setItem(KEY, JSON.stringify(store)); } catch(e){} }
+
+var AC = null;
+function tone(f, t, len, type, vol){
+  if(store.mute) return;
+  try {
+    AC = AC || new (window.AudioContext || window.webkitAudioContext)();
+    var o = AC.createOscillator(), g = AC.createGain(), at = AC.currentTime + (t || 0);
+    o.type = type || 'sine'; o.frequency.setValueAtTime(f, at);
+    g.gain.setValueAtTime(0, at); g.gain.linearRampToValueAtTime(vol || .1, at + .01); g.gain.exponentialRampToValueAtTime(.001, at + (len || .12));
+    o.connect(g); g.connect(AC.destination); o.start(at); o.stop(at + (len || .12) + .02);
+  } catch(e){}
+}
+var sfx = {
+  pip: function(){ tone(880, 0, .05, 'triangle', .05); },
+  bram: function(){ tone(220, 0, .07, 'triangle', .09); },
+  bump: function(){ tone(130, 0, .08, 'square', .04); },
+  push: function(){ tone(110, 0, .14, 'sawtooth', .05); },
+  splash: function(){ for(var i = 0; i < 6; i++) tone(500 + Math.random()*900, i*.025, .06, 'sine', .05); },
+  click: function(){ tone(1200, 0, .04, 'square', .04); tone(700, .05, .06, 'triangle', .06); },
+  home: function(){ tone(784, 0, .1); tone(1047, .09, .14); },
+  win: function(){ [523, 659, 784, 1047, 1319].forEach(function(f, i){ tone(f, i*.12, .2, 'triangle', .08); }); }
+};
+var muteBtn = document.getElementById('mute');
+function showMute(){ muteBtn.textContent = store.mute ? '🔇' : '🔊'; muteBtn.setAttribute('aria-pressed', String(!store.mute)); }
+muteBtn.onclick = function(){ store.mute = !store.mute; save(); showMute(); };
+showMute();
+
+var B, S, hist, moves, lvl, solved, svg = document.getElementById('board');
+var els = {};
+function xy(i){ return [(i % B.w)*T, Math.floor(i/B.w)*T]; }
+function load(n){
+  lvl = n; store.cur = n; save();
+  B = parseLevel(LEVELS[n]); S = clone(B.start); hist = []; moves = 0; solved = false;
+  var W = B.w*T, H = B.h*T, s = '';
+  for(var i = 0; i < B.base.length; i++){ var p = xy(i); s += tile(B.base[i], p[0], p[1], i, i); }
+  s += '<g id="rocks">';
+  S.rocks.forEach(function(r, k){ s += '<g class="rock mover" data-k="' + k + '">' + rockSVG() + '</g>'; });
+  s += '</g><g id="pipG" class="mover"><g class="flip">' + pipSVG() + '</g></g><g id="bramG" class="mover"><g class="flip">' + bramSVG() + '</g></g><g id="hintG"></g>';
+  svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+  svg.innerHTML = s;
+  els.pip = document.getElementById('pipG'); els.bram = document.getElementById('bramG');
+  els.rocks = [].slice.call(svg.querySelectorAll('.rock'));
+  // rocks keep their own element even after they sink, so track which element is which rock
+  els.rockMap = els.rocks.slice();
+  document.getElementById('lvname').innerHTML = '<small>Puzzle ' + (n + 1) + '</small>' + LEVELS[n].name;
+  document.getElementById('tip').textContent = LEVELS[n].tip;
+  sizeBoard(); draw(true);
+}
+function clone(s){ return {pip:s.pip, bram:s.bram, rocks:s.rocks.slice(), wet:s.wet.slice()}; }
+function place(el, i, instant){
+  var p = xy(i);
+  if(instant){ el.style.transition = 'none'; el.getBoundingClientRect(); }
+  el.style.transform = 'translate(' + p[0] + 'px,' + p[1] + 'px)';
+  if(instant) requestAnimationFrame(function(){ el.style.transition = ''; });
+}
+function draw(instant){
+  place(els.pip, S.pip, instant); place(els.bram, S.bram, instant);
+  els.rockMap.forEach(function(el, k){
+    if(k < S.rocks.length){ el.style.display = ''; place(el, S.rocks[k], instant); }
+    else el.style.display = 'none';
+  });
+  svg.querySelectorAll('.gate').forEach(function(g){ var i = +g.dataset.i; g.classList.toggle('open', tileOpenNow(i)); });
+  svg.querySelectorAll('.plate').forEach(function(g){ g.classList.toggle('down', occupied(S, +g.dataset.i)); });
+  svg.querySelectorAll('.water').forEach(function(g){ g.classList.toggle('wet', S.wet.indexOf(+g.dataset.i) >= 0); });
+  svg.querySelectorAll('.home').forEach(function(g){ var who = g.dataset.who; g.classList.toggle('on', B.base[S[who]] === (who === 'pip' ? 'P' : 'Q')); });
+  document.getElementById('moves').textContent = moves + (moves === 1 ? ' move' : ' moves');
+}
+function tileOpenNow(i){ return occupied(S, i) || gateOpen(B, S, B.base[i]); }
+var facing = {pip:1, bram:1};
+function move(who, dir){
+  if(solved || !document.getElementById('levels').hidden || !document.getElementById('win').hidden) return;
+  clearHint();
+  if(dir === 'left' || dir === 'right'){ facing[who] = dir === 'left' ? -1 : 1; els[who].firstChild.style.transform = facing[who] < 0 ? 'translate(48px,0) scale(-1,1)' : ''; }
+  var N = step(B, S, who, dir);
+  if(!N){ bump(who, dir); return; }
+  var wasOpen = gatesOpen(), homeBefore = atHome(who);
+  hist.push({s:clone(S), map:els.rockMap.slice()});
+  // keep each rock element tied to its rock: when one sinks, move it to the end of the list
+  if(N.pushed && N.pushed.sank){ var el = els.rockMap.splice(N.pushed.idx, 1)[0]; place(el, N.pushed.to); els.rockMap.push(el); setTimeout(function(){ draw(); }, 140); sfx.splash(); }
+  else if(N.pushed) sfx.push();
+  S = {pip:N.pip, bram:N.bram, rocks:N.rocks, wet:N.wet};
+  moves++;
+  sfx[who]();
+  if(gatesOpen() !== wasOpen) sfx.click();
+  if(!homeBefore && atHome(who)) sfx.home();
+  if(!(N.pushed && N.pushed.sank)) draw(); else { place(els[who], S[who]); document.getElementById('moves').textContent = moves + ' moves'; }
+  if(won(B, S)) finish();
+}
+function gatesOpen(){ var o = ''; B.base.forEach(function(t, i){ if(t === 'G' || t === 'H') o += tileOpenNow(i) ? 1 : 0; }); return o; }
+function atHome(who){ return B.base[S[who]] === (who === 'pip' ? 'P' : 'Q'); }
+function bump(who, dir){
+  sfx.bump();
+  var el = els[who].firstChild, d = DIRS[dir];
+  el.classList.remove('nudge'); void el.getBoundingClientRect();
+  el.style.setProperty('--nx', d[0]*5 + 'px'); el.style.setProperty('--ny', d[1]*5 + 'px');
+  el.classList.add('nudge');
+  // tell young players why, the first few times
+  var at = S[who], x = at % B.w + d[0], y = Math.floor(at/B.w) + d[1], t = (x >= 0 && y >= 0 && x < B.w && y < B.h) ? B.base[y*B.w + x] : '#', i = y*B.w + x;
+  var why = '';
+  if(t === 'o' && who === 'bram') why = 'Bramble is too big for burrows';
+  else if(who === 'pip' && S.rocks.indexOf(i) >= 0) why = 'Pip is too small to push boulders';
+  else if((t === 'G' || t === 'H') && !tileOpenNow(i)) why = 'The gate is shut. Find its button!';
+  else if(t === '~' && S.wet.indexOf(i) < 0) why = 'Splash! Nobody can swim here';
+  if(why){ bump.n = (bump.n || 0) + 1; if(bump.n < 12) toast(why); }
+}
+function undo(){ if(!hist.length || solved) return; var h = hist.pop(); S = h.s; els.rockMap = h.map; moves = Math.max(0, moves - 1); draw(); clearHint(); }
+function restart(){ load(lvl); }
+function finish(){
+  solved = true;
+  var par = LEVELS[lvl].par, a = moves <= par + 4 ? 3 : moves <= Math.round(par*1.5) + 4 ? 2 : 1;
+  var prev = store.best[lvl];
+  if(!prev || moves < prev.m) store.best[lvl] = {m:moves, a:Math.max(a, prev ? prev.a : 0)};
+  else if(a > prev.a) prev.a = a;
+  save();
+  setTimeout(function(){
+    sfx.win();
+    document.getElementById('winAcorns').textContent = '🌰'.repeat(a) + '◌'.repeat(3 - a);
+    document.getElementById('winAcorns').setAttribute('aria-label', a + ' acorns out of 3');
+    document.getElementById('winSub').textContent = moves + ' moves. ' + (a === 3 ? 'Super teamwork!' : a === 2 ? 'Can you do it in fewer?' : 'You did it together!');
+    document.getElementById('nextBtn').hidden = lvl >= LEVELS.length - 1;
+    document.getElementById('winT').textContent = lvl >= LEVELS.length - 1 ? 'All puzzles done!' : 'Both home!';
+    document.getElementById('win').hidden = false;
+    (lvl >= LEVELS.length - 1 ? document.getElementById('replayBtn') : document.getElementById('nextBtn')).focus();
+  }, 450);
+}
+// ---------- hint: search from here and point at the next move ----------
+var hintTimer;
+function clearHint(){ clearTimeout(hintTimer); document.getElementById('hintG') && (document.getElementById('hintG').innerHTML = ''); document.querySelectorAll('.pad button.hint').forEach(function(b){ b.classList.remove('hint'); }); }
+function hint(){
+  clearHint();
+  var path = solve(B, S, {limit:80000});
+  if(!path){ toast('Stuck! Press Undo or Restart.'); return; }
+  if(!path.length) return;
+  var m = path[0], p = xy(S[m.who]), d = DIRS[m.dir], cx = p[0] + 24 + d[0]*34, cy = p[1] + 24 + d[1]*34;
+  var rot = {up:0, right:90, down:180, left:270}[m.dir];
+  document.getElementById('hintG').innerHTML = '<g class="hintarrow" transform="translate(' + cx + ' ' + cy + ') rotate(' + rot + ')"><path d="M0 -14L13 2H5V14H-5V2H-13Z" fill="#FFD23F" stroke="' + INK + '" stroke-width="2.5" stroke-linejoin="round"/></g>';
+  var btn = document.querySelector('.pad.' + m.who + ' button[data-dir="' + m.dir + '"]'); if(btn) btn.classList.add('hint');
+  toast((m.who === 'pip' ? 'Pip' : 'Bramble') + ' goes ' + m.dir);
+  hintTimer = setTimeout(clearHint, 2500);
+}
+function toast(t){ var el = document.getElementById('toast'); el.textContent = t; el.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(function(){ el.classList.remove('on'); }, 1400); }
+
+// ---------- sizing: biggest board that fits ----------
+function sizeBoard(){
+  var wrap = svg.parentNode, W = wrap.clientWidth, H = wrap.clientHeight;
+  if(!W || !H) return;
+  var s = Math.min(W/(B.w*T), H/(B.h*T));
+  svg.style.width = Math.floor(B.w*T*s) + 'px'; svg.style.height = Math.floor(B.h*T*s) + 'px';
+}
+addEventListener('resize', function(){ if(B) sizeBoard(); });
+
+// ---------- controls ----------
+var KEYS = {w:['pip', 'up'], a:['pip', 'left'], s:['pip', 'down'], d:['pip', 'right'], ArrowUp:['bram', 'up'], ArrowLeft:['bram', 'left'], ArrowDown:['bram', 'down'], ArrowRight:['bram', 'right']};
+var lastKey = {pip:0, bram:0};
+document.addEventListener('keydown', function(e){
+  if(e.metaKey || e.ctrlKey || e.altKey) return;
+  var k = KEYS[e.key] || KEYS[(e.key || '').toLowerCase()];
+  if(k){
+    e.preventDefault();
+    var now = Date.now(); if(e.repeat && now - lastKey[k[0]] < 140) return; lastKey[k[0]] = now;
+    move(k[0], k[1]); return;
+  }
+  var l = (e.key || '').toLowerCase();
+  if(l === 'z' || l === 'u' || e.key === 'Backspace'){ e.preventDefault(); undo(); }
+  else if(l === 'r'){ restart(); }
+  else if(l === 'h'){ hint(); }
+  else if(e.key === 'Escape'){ document.getElementById('levels').hidden = true; }
+});
+document.querySelectorAll('.pad').forEach(function(pad){
+  var who = pad.dataset.who;
+  pad.querySelectorAll('button').forEach(function(b){
+    b.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="' + ARROW[b.dataset.dir] + '" fill="currentColor" stroke="' + INK + '" stroke-width="1.6" stroke-linejoin="round"/></svg>';
+    var rep, rep2;
+    b.addEventListener('pointerdown', function(e){ e.preventDefault(); b.classList.add('on'); move(who, b.dataset.dir); clearTimeout(rep); clearInterval(rep2); rep = setTimeout(function(){ rep2 = setInterval(function(){ move(who, b.dataset.dir); }, 200); }, 450); try { b.setPointerCapture(e.pointerId); } catch(x){} });
+    ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(function(ev){ b.addEventListener(ev, function(){ clearTimeout(rep); clearInterval(rep2); b.classList.remove('on'); }); });
+    b.addEventListener('click', function(e){ if(e.detail === 0) move(who, b.dataset.dir); });
+  });
+});
+document.getElementById('pipFace').innerHTML = '<svg viewBox="0 0 48 48" aria-hidden="true">' + pipSVG() + '</svg><span>Pip <small>W A S D</small></span>';
+document.getElementById('bramFace').innerHTML = '<svg viewBox="0 0 48 48" aria-hidden="true">' + bramSVG() + '</svg><span>Bramble <small>arrows</small></span>';
+document.getElementById('undo').onclick = undo;
+document.getElementById('restart').onclick = restart;
+document.getElementById('hintBtn').onclick = hint;
+
+// ---------- level list ----------
+function openLevels(){
+  document.getElementById('how').innerHTML =
+    '<div><svg viewBox="0 0 48 48">' + pipSVG() + '</svg><span><b>Pip</b> is little. Fits through burrow holes. Keys W A S D.</span></div>' +
+    '<div><svg viewBox="0 0 48 48">' + bramSVG() + '</svg><span><b>Bramble</b> is big and strong. Pushes boulders. Arrow keys.</span></div>';
+  document.getElementById('levelGrid').innerHTML = LEVELS.map(function(L, i){
+    var b = store.best[i];
+    return '<button data-n="' + i + '" class="' + (i === lvl ? 'cur ' : '') + (b ? 'done' : '') + '" aria-label="Puzzle ' + (i + 1) + ', ' + L.name + (b ? ', done' : '') + '"><b>' + (i + 1) + '</b><small>' + L.name + '</small><span class="acorns">' + (b ? '🌰'.repeat(b.a) : '') + '</span></button>';
+  }).join('');
+  document.getElementById('levels').hidden = false;
+  var cur = document.querySelector('#levelGrid .cur'); if(cur) cur.focus();
+}
+document.getElementById('levelGrid').onclick = function(e){ var b = e.target.closest('button'); if(!b) return; document.getElementById('levels').hidden = true; load(+b.dataset.n); };
+document.getElementById('levelsBtn').onclick = openLevels;
+document.getElementById('closeLevels').onclick = function(){ document.getElementById('levels').hidden = true; sizeBoard(); };
+document.getElementById('nextBtn').onclick = function(){ document.getElementById('win').hidden = true; load(Math.min(lvl + 1, LEVELS.length - 1)); };
+document.getElementById('replayBtn').onclick = function(){ document.getElementById('win').hidden = true; load(lvl); };
+
+load(store.cur);
+if(!Object.keys(store.best).length) openLevels();
+})();
+</script>
+</body>
+</html>
