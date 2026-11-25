@@ -8,3 +8,4 @@ The Harsh family home page. Edit the files and push to `main`; Cloudflare builds
 - **LinkedIn button:** set `LINKEDIN_URL` near the bottom of `index.html`.
 - **Company logos:** stored in `assets/logos/` and listed on the About page (`about/index.html`). Logos show in white on the dark background.
 - **Chess Club:** lives in `chess/` (`index.html` for the page, `engine.js` for the rules). Puzzles come live from the free Lichess puzzle API; if Lichess can't be reached it falls back to a small built-in set.
+- **Rolling back:** in Cloudflare, open family-site, then Deployments, and roll back to an earlier version. Each push to `main` makes a new one.
