@@ -169,7 +169,7 @@ h1,h2,h3{line-height:1.08;margin:0;text-wrap:balance}
 .intro{display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;padding:26px 16px}
 .intro .bigpic .pic,.intro .bigpic .num{font-size:110px}
 .intro .bigpic .sw{width:120px;height:120px}
-.intro .word{font-size:44px}.intro .word.zh{font-size:54px}.intro .rom{font-size:22px}
+.intro .rom{display:block}.intro .word{font-size:44px}.intro .word.zh{font-size:54px}.intro .rom{font-size:22px}
 .en{font-size:22px;font-weight:700;color:var(--soft)}
 .spkrow{display:flex;gap:12px;justify-content:center;margin:6px 0}
 .spk{width:64px;height:64px;border-radius:20px;border:0;background:var(--acc);color:#fff;display:grid;place-items:center;box-shadow:0 5px 0 rgba(0,0,0,.22)}
@@ -913,7 +913,7 @@ function learnTab(p){
   }).join('');
   return `<div class="langs">${LCODES.map(c=>`<button class="lang${p.lang===c?' on':''}" data-l="${c}" data-act="lang" data-c="${c}" lang="${c}">${LANGS[c].native}<small>${LANGS[c].name}</small></button>`).join('')}</div>
     <div style="margin-top:14px">${goalCard(p)}</div>
-    <div class="card practice"><svg class="ic" viewBox="0 0 24 24">${IC.target.replace(/^<svg[^>]*>|<\/svg>$/g,'')}</svg><div style="flex:1"><b style="font-size:20px">Practice my mistakes</b><div class="muted">${Object.keys(p.miss[p.lang]).length?Object.keys(p.miss[p.lang]).length+' tricky word'+(Object.keys(p.miss[p.lang]).length===1?'':'s')+' to practice':'Review the words you know'}</div></div><button class="btn sm" data-act="practice">Go</button></div>${units}`;
+    <div class="card practice">${IC.target.replace('<svg','<svg class="ic"')}<div style="flex:1"><b style="font-size:20px">Practice my mistakes</b><div class="muted">${Object.keys(p.miss[p.lang]).length?Object.keys(p.miss[p.lang]).length+' tricky word'+(Object.keys(p.miss[p.lang]).length===1?'':'s')+' to practice':'Review the words you know'}</div></div><button class="btn sm" data-act="practice">Go</button></div>${units}`;
 }
 function petTab(p){
   const st = stageOf(p);
