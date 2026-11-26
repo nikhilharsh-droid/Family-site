@@ -445,6 +445,7 @@ var view = {
 var boardEl = $('board');
 
 function render(){
+  if (drag) dropDrag();
   var st = view.st, html = '', checkSq = -1;
   if (C.inCheck(st)) checkSq = st.board.indexOf(st.turn === 'w' ? 'K' : 'k');
   for (var vi = 0; vi < 64; vi++){
@@ -468,6 +469,22 @@ function render(){
 }
 function sqEl(i){ return boardEl.querySelector('[data-sq="' + i + '"]'); }
 function clearSel(){ view.selected = -1; view.targets = []; }
+/* Show the selection and move dots by changing the squares in place. Rebuilding the board while a finger
+   is still down takes the touched square out of the page, and on phones (iPhone Safari above all) the rest of
+   that touch is then lost, so drags stopped working and the board could seem stuck. */
+function mark(){
+  var sqs = boardEl.querySelectorAll('.sq');
+  if (sqs.length !== 64){ render(); return; }
+  for (var k = 0; k < 64; k++){
+    var s = sqs[k], i = +s.dataset.sq;
+    s.classList.toggle('sel', i === view.selected);
+    s.classList.toggle('hint', i === view.hint);
+    s.classList.remove('over');
+    var old = s.querySelector('.dot,.ring'); if (old) old.remove();
+    var pc = s.querySelector('.pc'); if (pc) pc.classList.remove('ghosted');
+    if (view.targets.indexOf(i) >= 0){ var sp = document.createElement('span'); sp.className = view.st.board[i] ? 'ring' : 'dot'; s.appendChild(sp); }
+  }
+}
 
 var INFO = {
   p: ['Pawn', 'Moves 1 step forward (2 on its first move) and captures 1 step diagonally.'],
@@ -486,72 +503,87 @@ function select(i){
   view.selected = i;
   view.targets = C.legalMoves(view.st).filter(function(m){ return m.from === i; }).map(function(m){ return m.to; });
   view.hint = -1;
-  render();
+  mark();
 }
 function mine(i){ var p = view.st.board[i]; return p && C.colorOf(p) === view.st.turn; }
 
 function attempt(from, to){
   var ms = C.legalMoves(view.st).filter(function(m){ return m.from === from && m.to === to; });
   clearSel();
-  if (!ms.length){ render(); return; }
+  if (!ms.length){ mark(); return; }
   if (ms.length > 1){ // promotion
     askPromo(view.st.turn, function(pc){
       var m = ms.filter(function(x){ return x.promo.toLowerCase() === pc; })[0];
       view.onMove && view.onMove(m, false);
     });
-    render();
+    mark();
     return;
   }
   view.onMove && view.onMove(ms[0], false);
 }
 
-/* pointer: tap-tap or drag */
+/* pointer: tap-tap or drag. One finger at a time: a second finger (a thumb holding the phone, a sibling
+   pointing) is ignored while the first is down. Move and lift are heard on the whole window, so a finger that
+   slides off the board or a square that gets redrawn can't leave a drag hanging. */
 var drag = null;
+function dropDrag(){
+  if (drag && drag.ghost) drag.ghost.remove();
+  drag = null;
+  document.querySelectorAll('body > .drag').forEach(function(g){ g.remove(); });
+}
 boardEl.addEventListener('pointerdown', function(e){
   if (!view.interactive) return;
+  if (drag && drag.id !== e.pointerId){
+    if (e.pointerType === 'touch' && !drag.moved) return; // another finger is already on a piece
+    dropDrag(); // leftover from a lost touch: start fresh
+  }
+  if (e.pointerType === 'mouse' && e.button !== 0) return;
   var s = e.target.closest('.sq'); if (!s) return;
   var i = +s.dataset.sq;
   e.preventDefault();
-  if (view.selected >= 0 && view.targets.indexOf(i) >= 0){ attempt(view.selected, i); return; }
+  if (view.selected >= 0 && view.targets.indexOf(i) >= 0){ dropDrag(); attempt(view.selected, i); return; }
   if (mine(i)){
     if (view.selected !== i) { select(i); sfx.click(); }
-    drag = { from: i, x: e.clientX, y: e.clientY, moved: false, ghost: null, wasSel: true };
-    boardEl.setPointerCapture && boardEl.setPointerCapture(e.pointerId);
-  } else { clearSel(); render(); }
+    drag = { id: e.pointerId, from: i, x: e.clientX, y: e.clientY, moved: false, ghost: null };
+    try { boardEl.setPointerCapture(e.pointerId); } catch(err){}
+  } else { dropDrag(); clearSel(); mark(); }
 });
-boardEl.addEventListener('pointermove', function(e){
-  if (!drag) return;
+window.addEventListener('pointermove', function(e){
+  if (!drag || e.pointerId !== drag.id) return;
   if (!drag.moved && Math.hypot(e.clientX - drag.x, e.clientY - drag.y) < 6) return;
+  var p = view.st.board[drag.from];
+  if (!view.interactive || !p){ dropDrag(); mark(); return; }
   var size = boardEl.getBoundingClientRect().width / 8;
   if (!drag.moved){
     drag.moved = true;
     var g = document.createElement('div'); g.className = 'drag';
     g.style.width = g.style.height = size * 1.15 + 'px';
-    g.innerHTML = pieceSVG(view.st.board[drag.from], 'pcd');
+    g.innerHTML = pieceSVG(p, 'pcd');
     g.firstChild.style.width = g.firstChild.style.height = '100%';
     document.body.appendChild(g); drag.ghost = g;
-    var pc = sqEl(drag.from).querySelector('.pc'); if (pc) pc.classList.add('ghosted');
+    var sq = sqEl(drag.from), pc = sq && sq.querySelector('.pc'); if (pc) pc.classList.add('ghosted');
   }
   drag.ghost.style.left = (e.clientX - size * .575) + 'px';
   drag.ghost.style.top = (e.clientY - size * .75) + 'px';
   var over = document.elementFromPoint(e.clientX, e.clientY);
   boardEl.querySelectorAll('.over').forEach(function(x){ x.classList.remove('over'); });
   var os = over && over.closest && over.closest('.sq');
-  if (os && view.targets.indexOf(+os.dataset.sq) >= 0) os.classList.add('over');
+  if (os && boardEl.contains(os) && view.targets.indexOf(+os.dataset.sq) >= 0) os.classList.add('over');
 });
 function endDrag(e){
-  if (!drag) return;
-  var d = drag; drag = null;
-  if (d.ghost) d.ghost.remove();
+  if (!drag || e.pointerId !== drag.id) return;
+  var d = drag; dropDrag();
   if (!d.moved) return;
+  if (!view.interactive){ mark(); return; }
   var over = document.elementFromPoint(e.clientX, e.clientY);
   var os = over && over.closest && over.closest('.sq');
-  var to = os ? +os.dataset.sq : -1;
+  var to = os && boardEl.contains(os) ? +os.dataset.sq : -1;
   if (to >= 0 && view.targets.indexOf(to) >= 0) attempt(d.from, to);
-  else render();
+  else mark();
 }
-boardEl.addEventListener('pointerup', endDrag);
-boardEl.addEventListener('pointercancel', function(){ if (drag && drag.ghost) drag.ghost.remove(); drag = null; render(); });
+window.addEventListener('pointerup', endDrag);
+window.addEventListener('pointercancel', function(e){ if (!drag || e.pointerId !== drag.id) return; dropDrag(); mark(); });
+window.addEventListener('blur', function(){ if (drag){ dropDrag(); mark(); } });
 
 /* animate a move on the current view, then call done */
 function animate(m, done){
