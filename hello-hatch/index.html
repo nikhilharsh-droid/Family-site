@@ -45,6 +45,9 @@ h1,h2,h3{line-height:1.08;margin:0;text-wrap:balance}
 .chip svg{width:24px;height:24px;flex:none}
 .chip .mini{width:30px;height:30px}
 .spacer{flex:1}
+.gohome{text-decoration:none;color:inherit;font-size:20px}
+.gohome b{font-size:17px}
+@media(max-width:520px){.gohome b{display:none}}
 .wrap{max-width:1100px;margin:0 auto;padding:0 max(3vw,12px)}
 .home{display:grid;grid-template-columns:minmax(0,1fr);gap:22px;padding:16px 0 110px}
 .side{display:none}
@@ -551,31 +554,74 @@ const pick = a=>a[Math.floor(Math.random()*a.length)];
 
 /* ---------- sound ---------- */
 let voices = [];
-const hasTTS = 'speechSynthesis' in window;
+const hasTTS = 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
+const badVoice = {};   // voices that failed to play this visit; skipped next time
+const keepU = [];      // hold on to utterances so the browser doesn't drop them mid-word
 function loadVoices(){ try { voices = speechSynthesis.getVoices() || []; } catch(e) { voices = []; } }
-if (hasTTS) { loadVoices(); try { speechSynthesis.addEventListener('voiceschanged', ()=>{ loadVoices(); if (view.screen==='grown') render(); }); } catch(e) {} }
+if (hasTTS) {
+  loadVoices();
+  try { speechSynthesis.addEventListener('voiceschanged', ()=>{ loadVoices(); if (view.screen==='grown') render(); }); } catch(e) {}
+  [400,1500,4000].forEach(t=>setTimeout(()=>{ if (!voices.length) { loadVoices(); if (voices.length && view.screen==='grown') render(); } },t));
+}
+// Phones report language tags in many shapes: zh-CN, zh_CN, zh_CN_#Hans, cmn-Hans-CN, zh-Hans-CN.
+function cleanTag(t){ return String(t||'').replace(/#.*$/,'').replace(/_/g,'-').replace(/-+$/,''); }
+function tagKey(t){
+  const parts = cleanTag(t).toLowerCase().split('-').filter(x=>x && !/^(hans|hant|latn|deva)$/.test(x));
+  if (parts[0]==='cmn') parts[0]='zh';
+  return parts.join('-');
+}
+const vid = v=>v.voiceURI||v.name;
 function voiceFor(lang){
-  const norm = v=>String(v.lang||'').replace('_','-').toLowerCase();
-  const prefs = LANGS[lang].tts.map(c=>c.toLowerCase());
-  for (const c of prefs) {
-    const m = voices.filter(v=>norm(v)===c);
-    if (m.length) return m.find(v=>/google/i.test(v.name)) || m[0];
-  }
+  const prefs = LANGS[lang].tts.map(tagKey);
   const base = prefs[prefs.length-1];
-  const m = voices.filter(v=>{const n=norm(v);return (n===base||n.startsWith(base+'-')) && !/hk|yue/.test(n)});
-  return m[0] || null;
+  const ok = voices.filter(v=>!badVoice[vid(v)]);
+  for (const c of prefs) {
+    const m = ok.filter(v=>tagKey(v.lang)===c);
+    if (m.length) return m.find(v=>/google/i.test(v.name)) || m.find(v=>v.localService) || m[0];
+  }
+  const m = ok.filter(v=>{ const k=tagKey(v.lang); return (k===base || k.startsWith(base+'-')) && !/hk|yue|mo/.test(k); });
+  return m.find(v=>v.localService) || m[0] || null;
 }
-function speak(text, lang, slow){
+// report(ok, detail) is optional; the grown-ups Test button uses it.
+function speak(text, lang, slow, report){
   if (!hasTTS || !text) return;
-  try {
-    speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text);
-    const v = voiceFor(lang);
-    if (v) { u.voice = v; u.lang = v.lang; } else u.lang = LANGS[lang].tts[0];
-    u.rate = slow ? 0.55 : S.set.rate;
-    speechSynthesis.speak(u);
-  } catch(e) {}
+  if (!voices.length) loadVoices();
+  try { if (speechSynthesis.speaking || speechSynthesis.pending) speechSynthesis.cancel(); } catch(e) {}
+  sayTry(text, lang, slow, 0, report);
 }
+function sayTry(text, lang, slow, tries, report){
+  try {
+    if (speechSynthesis.paused) speechSynthesis.resume();
+    // Last try: no named voice, just the language, and let the phone choose.
+    const v = tries<2 ? voiceFor(lang) : null;
+    const u = new SpeechSynthesisUtterance(text);
+    if (v) u.voice = v;
+    u.lang = (v && cleanTag(v.lang)) || LANGS[lang].tts[0];
+    u.rate = slow ? 0.55 : S.set.rate;
+    let started=false, done=false, wd;
+    const finish = ()=>{ done=true; clearTimeout(wd); const i=keepU.indexOf(u); if (i>=0) keepU.splice(i,1); };
+    const fail = why=>{
+      if (done) return; finish();
+      if (v) badVoice[vid(v)] = 1;
+      if (tries<2) { try { speechSynthesis.cancel(); } catch(e) {} setTimeout(()=>sayTry(text,lang,slow,tries+1,report),80); }
+      else if (report) report(false, why);
+    };
+    u.onstart = ()=>{ started=true; };
+    u.onend = ()=>{ if (done) return; finish(); if (report) report(true, v ? v.name : 'the phone’s own voice'); };
+    u.onerror = ev=>{ const why=(ev&&ev.error)||'error'; if (why==='interrupted'||why==='canceled') { finish(); return; } fail(why); };
+    wd = setTimeout(()=>{ if (!started && !done) fail('did not start'); }, 3000);
+    keepU.push(u); if (keepU.length>10) keepU.shift();
+    speechSynthesis.speak(u);
+  } catch(e) { if (report) report(false, 'error'); }
+}
+// Phones only allow speech that starts from a tap. Wake it up on the first tap so the words
+// that play by themselves (new word cards, listening) can be heard too.
+let ttsAwake = false;
+function wakeTTS(){
+  if (ttsAwake || !hasTTS) return; ttsAwake = true;
+  try { const u = new SpeechSynthesisUtterance(' '); u.volume = 0; keepU.push(u); speechSynthesis.speak(u); } catch(e) {}
+}
+if (hasTTS) ['pointerdown','touchend','keydown'].forEach(t=>document.addEventListener(t, wakeTTS, {capture:true, passive:true}));
 let AC;
 function tone(freqs, dur=0.12, type='sine'){
   if (!S.set.sfx) return;
@@ -861,10 +907,12 @@ function storyFinish(){
 }
 
 /* ---------- screens ---------- */
+const HOME_LINK = !!SYNC;   // only on the family site, where / is the games page
 const app = document.getElementById('app');
 function topBar(p){
   const L = LANGS[p.lang], st = effStreak(p);
   return `<header class="top"><div class="topin">
+    ${HOME_LINK?'<a class="chip gohome" href="/" aria-label="Back to all our games"><span aria-hidden="true">🏡</span><b>Games</b></a>':''}
     <button class="chip" data-act="players" aria-label="Switch player">${petSVG(p,{scene:false}).replace('<svg','<svg class="mini"')}${esc(p.name)}</button>
     <span class="spacer"></span>
     <span class="chip" title="Days in a row">${st?IC.sun:IC.sunOff}${st}${p.freezes?`<span class="frz" title="Streak freezes">${IC.ice}${p.freezes}</span>`:''}</span>
@@ -1082,7 +1130,7 @@ function endScreen(){
     <button class="btn" data-act="endDone">Continue</button></main>`;
 }
 function grownScreen(){
-  const vrow = c=>{const v=hasTTS?voiceFor(c):null;return `<div class="setrow"><div><b>${LANGS[c].name}</b><div class="muted">${!hasTTS?'Speech is not available in this browser.':v?'Voice: '+esc(v.name):voices.length?'No voice found on this device. Words still show, but they may be read out wrong.':'Looking for voices…'}</div></div><button class="btn sm" data-act="say" data-text="${esc(LANGS[c].hello+' '+LANGS[c].thanks)}" data-lang="${c}">Test</button></div>`};
+  const vrow = c=>{const v=hasTTS?voiceFor(c):null;return `<div class="setrow"><div><b>${LANGS[c].name}</b><div class="muted">${!hasTTS?'Speech is not available in this browser.':v?'Voice: '+esc(v.name):voices.length?'No voice found on this device. Words still show, but they may be read out wrong.':'Looking for voices…'}</div></div><button class="btn sm" data-act="say" data-text="${esc(LANGS[c].hello+' '+LANGS[c].thanks)}" data-lang="${c}" data-test="1">Test</button></div>`};
   const tog = (k,on)=>`<button class="tog" data-act="set" data-k="${k}" aria-pressed="${on}">${on?'On':'Off'}</button>`;
   return `<main class="narrow"><div class="lbar"><button class="x" data-act="grownBack" aria-label="Back">${IC.x}</button><h1 style="font-size:32px">Grown-ups</h1></div>
   <h3 class="sec">Words and sound</h3><div class="set">
@@ -1144,7 +1192,11 @@ const A = {
     if (el && el.classList.contains('locked')) { toast('Finish the lesson before this one first'); return; }
     startLesson(u,n);
   },
-  say(d){ speak(d.text, d.lang || (LS&&view.screen==='lesson'?LS.lang:P()?P().lang:'es'), !!d.slow); },
+  say(d){
+    const lang = d.lang || (LS&&view.screen==='lesson'?LS.lang:P()?P().lang:'es');
+    const report = d.test ? (ok,why)=>{ toast(ok ? LANGS[lang].name+' played with '+why+'.' : LANGS[lang].name+' didn’t play ('+why+'). Check the volume, and that the phone isn’t on silent.'); if (view.screen==='grown') render(); } : null;
+    speak(d.text, lang, !!d.slow, report);
+  },
   sel(d,el){
     if (LS.phase!=='answer') return;
     LS.sel=+d.i; const e=LS.ex[LS.i];
