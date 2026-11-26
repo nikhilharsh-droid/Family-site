@@ -26,7 +26,7 @@
 @font-face{font-family:"Figtree";src:url(/assets/fonts/figtree-400.woff2) format("woff2");font-weight:400;font-display:swap}
 @font-face{font-family:"Figtree";src:url(/assets/fonts/figtree-500.woff2) format("woff2");font-weight:500;font-display:swap}
 @font-face{font-family:"Figtree";src:url(/assets/fonts/figtree-600.woff2) format("woff2");font-weight:600;font-display:swap}
-/* Layout: a kids-first front door. The night sky and keycaps stay; three big game tiles sit right under a short hero; grown-up stuff is one quiet line that leads to /about/. */
+/* Layout: a kids-first front door. The night sky and keycaps stay; four big game tiles sit right under a short hero; grown-up stuff is one quiet line that leads to /about/. */
 :root{
   --bg:#0B0D1F;
   --surface:rgba(255,255,255,.06);
@@ -102,7 +102,8 @@ section{padding-block:18px;scroll-margin-top:84px}
 .sechead{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px}
 h2{font-family:var(--display);font-weight:800;font-size:clamp(28px,4vw,40px);letter-spacing:-.03em;line-height:1;margin:0}
 .sechead p{margin:0;color:var(--muted);font-size:15px}
-.games{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+.games{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px}
+@media (max-width:1100px){.games{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .game{display:grid;grid-template-rows:auto 1fr auto;gap:14px;padding:14px 14px 20px;border-radius:var(--r);background:var(--surface);border:1px solid var(--line);text-decoration:none;transition:transform .2s ease,border-color .2s,background .2s;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
 .game:hover{transform:translateY(-4px);border-color:var(--c);background:rgba(255,255,255,.09)}
 .game:active{transform:translateY(0) scale(.98)}
@@ -112,6 +113,7 @@ h2{font-family:var(--display);font-weight:800;font-size:clamp(28px,4vw,40px);let
 .g1{--c:var(--coral);--bgp:linear-gradient(140deg,#FF6F6B,#FFB627)}
 .g2{--c:var(--aqua);--bgp:linear-gradient(140deg,#2EC4B6,#8E5CF7)}
 .g3{--c:var(--violet);--bgp:linear-gradient(140deg,#8E5CF7,#2EC4B6 90%)}
+.g4{--c:var(--marigold);--bgp:linear-gradient(140deg,#FFB627,#FF5E5B 95%)}
 .kc{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;width:62%;transform:rotate(-6deg)}
 .kc span{aspect-ratio:1;border-radius:14px;display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:clamp(20px,2.6vw,30px);color:var(--dark);background:rgba(255,255,255,.92);box-shadow:inset 0 -5px 0 rgba(0,0,0,.18),0 8px 18px rgba(0,0,0,.2)}
 .kc span.on{background:var(--marigold)}
@@ -227,6 +229,20 @@ footer a{color:var(--muted)}
           </svg>
         </div>
         <div class="gtext"><h3>Chess Club</h3><p>Play a friend or solve puzzles.</p></div>
+        <span class="go">Play <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M6 3.5v13l10-6.5z" fill="currentColor"/></svg></span>
+      </a>
+      <a class="game g4" href="/hello-hatch/">
+        <div class="pic" aria-hidden="true">
+          <svg viewBox="0 0 220 180"><ellipse cx="96" cy="166" rx="46" ry="8" fill="rgba(0,0,0,.18)"/>
+            <path d="M52 112c0-44 20-86 44-86s44 42 44 86c0 30-20 52-44 52s-44-22-44-52z" fill="#FFF4E6" stroke="#FF8FB1" stroke-width="5"/>
+            <circle cx="74" cy="132" r="7" fill="#FF8FB1"/><circle cx="120" cy="140" r="9" fill="#FF8FB1"/><circle cx="114" cy="56" r="5" fill="#FF8FB1"/>
+            <path d="M54 98l14-10 12 12 14-12 14 12 14-12 12 10" fill="none" stroke="#C7577B" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="82" cy="78" r="6" fill="#2B2340"/><circle cx="110" cy="78" r="6" fill="#2B2340"/><circle cx="84" cy="76" r="2" fill="#fff"/><circle cx="112" cy="76" r="2" fill="#fff"/>
+            <path d="M90 88q6 6 12 0" fill="none" stroke="#2B2340" stroke-width="4" stroke-linecap="round"/>
+            <rect x="128" y="10" width="84" height="44" rx="18" fill="#fff"/><path d="M144 50l-12 20 26-16z" fill="#fff"/>
+            <text x="170" y="40" text-anchor="middle" font-family="system-ui,sans-serif" font-weight="800" font-size="22" fill="#14122B">¡Hola!</text></svg>
+        </div>
+        <div class="gtext"><h3>Hello Hatch</h3><p>Learn Spanish, Chinese and Hindi.</p></div>
         <span class="go">Play <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M6 3.5v13l10-6.5z" fill="currentColor"/></svg></span>
       </a>
     </div>

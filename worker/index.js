@@ -1,6 +1,7 @@
 import { handleChess } from './chess-api.js';
+import { handleHelloHatch } from './hellohatch-api.js';
 // Harsh family site. Cloudflare serves the page files straight from this repo (see wrangler.jsonc);
-// this script only runs for the live routes: Chess Club stats, the featured art wall and /status.json.
+// this script only runs for the live routes: Chess Club stats, Hello Hatch saves, the featured art wall and /status.json.
 // The same security headers are set for page files in _headers.
 const SECURITY = {
   'X-Content-Type-Options': 'nosniff',
@@ -25,6 +26,9 @@ async function route(request, env) {
   // Chess Club stats (players, results, puzzle streaks, coin-toss turns)
   const chess = await handleChess(request, env).catch(() => new Response(JSON.stringify({ error: 'chess api failed' }), { status: 500, headers: { 'Content-Type': 'application/json' } }));
   if (chess) return chess;
+  // Hello Hatch saves (players' progress, shared across the family's computers)
+  const hatch = await handleHelloHatch(request, env).catch(() => new Response(JSON.stringify({ error: 'hello hatch api failed' }), { status: 500, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' } }));
+  if (hatch) return hatch;
   if (request.method !== 'GET' && request.method !== 'HEAD') return new Response('Method not allowed', { status: 405 });
   const path = url.pathname;
 
