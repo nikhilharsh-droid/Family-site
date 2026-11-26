@@ -10,7 +10,7 @@
 <style>
 @font-face{font-family:"Bricolage Grotesque";src:url(/assets/fonts/bricolage.woff2) format("woff2");font-weight:200 800;font-display:swap}
 @font-face{font-family:"Figtree";src:url(/assets/fonts/figtree-600.woff2) format("woff2");font-weight:600;font-display:swap}
-/* Missing page: the home page's night sky, one friendly line, and the three games one tap away. */
+/* Missing page: the home page's night sky, one friendly line, and the four games one tap away. */
 :root{--bg:#0B0D1F;--surface:rgba(255,255,255,.06);--line:rgba(255,255,255,.12);--ink:#F4F2FF;--muted:#A9A8C6;--coral:#FF5E5B;--marigold:#FFB627;--aqua:#2EC4B6;--violet:#8E5CF7;
   --display:"Bricolage Grotesque","Avenir Next",system-ui,sans-serif;--body:"Figtree","Segoe UI",system-ui,sans-serif;color-scheme:dark}
 *{box-sizing:border-box}
@@ -28,11 +28,12 @@ main{width:100%;max-width:640px;text-align:center;display:grid;gap:18px;justify-
 h1{font-family:var(--display);font-weight:800;font-size:clamp(36px,8vw,58px);line-height:1;letter-spacing:-.03em;margin:8px 0 0}
 p{margin:0;color:var(--muted);font-size:19px;max-width:32ch}
 .home{display:inline-block;margin-top:4px;padding:14px 26px;border-radius:999px;background:var(--marigold);color:#14122B;text-decoration:none;font-size:18px;box-shadow:inset 0 -4px 0 rgba(0,0,0,.18)}
-.games{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;width:100%;margin-top:10px}
+.games{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;width:100%;margin-top:10px}
 .games a{display:grid;gap:6px;justify-items:center;padding:18px 10px;border-radius:20px;background:var(--surface);border:1px solid var(--line);text-decoration:none}
 .games a:hover{border-color:var(--c)}
 .games i{font-style:normal;font-size:34px;line-height:1}
 .games b{font-family:var(--display);font-weight:800;font-size:18px}
+@media (max-width:520px){.games{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (max-width:420px){.keys span{width:54px;height:54px;font-size:26px}.games{gap:8px}.games a{padding:14px 6px}.games b{font-size:15px}}
 @media (prefers-reduced-motion:reduce){.keys span{animation:none}}
 </style>
@@ -47,6 +48,7 @@ p{margin:0;color:var(--muted);font-size:19px;max-width:32ch}
     <a href="https://play.nikhilharsh.com" style="--c:var(--coral)"><i aria-hidden="true">⌨️</i><b>Paws &amp; Keys</b></a>
     <a href="/draw/" style="--c:var(--aqua)"><i aria-hidden="true">🎨</i><b>Doodle</b></a>
     <a href="/chess/" style="--c:var(--violet)"><i aria-hidden="true">♞</i><b>Chess</b></a>
+    <a href="/hello-hatch/" style="--c:var(--marigold)"><i aria-hidden="true">🥚</i><b>Hello Hatch</b></a>
   </nav>
 </main>
 </body>
